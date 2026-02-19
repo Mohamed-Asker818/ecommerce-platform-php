@@ -1,5 +1,4 @@
 <?php
-// my_orders_api.php - Orders Data Handler
 session_start();
 require_once '../Model/db.php';
 
@@ -41,7 +40,6 @@ class MyOrdersAPI {
             
             $status = isset($_GET['status']) ? $_GET['status'] : null;
             
-            // Build query with filters - مصحح
             $query = "SELECT SQL_CALC_FOUND_ROWS 
                       o.*, 
                       COUNT(oi.id) as items_count
@@ -80,12 +78,10 @@ class MyOrdersAPI {
                 $orders[] = $this->formatOrder($row);
             }
             
-            // Get total count
             $totalResult = $this->conn->query("SELECT FOUND_ROWS() as total");
             $totalRow = $totalResult->fetch_assoc();
             $total = $totalRow['total'];
             
-            // Get statistics
             $stats = $this->getOrderStats();
             
             return [
@@ -116,19 +112,15 @@ class MyOrdersAPI {
         }
         
         try {
-            // Verify order belongs to user
             $order = $this->getOrderById($orderId);
             if (!$order) {
                 return $this->errorResponse('الطلب غير موجود أو لا تملك صلاحية الوصول');
             }
             
-            // Get order items
             $items = $this->getOrderItems($orderId);
             
-            // Get order timeline
             $timeline = $this->getOrderTimeline($orderId, $order);
             
-            // Get shipping info if available
             $shipping = $this->getShippingInfo($orderId);
             
             return [
@@ -152,22 +144,18 @@ class MyOrdersAPI {
             return $this->errorResponse('رقم الطلب غير صالح');
         }
         
-        // Start transaction
         $this->conn->begin_transaction();
         
         try {
-            // Verify order belongs to user and can be cancelled
             $order = $this->getOrderById($orderId);
             if (!$order) {
                 throw new Exception('الطلب غير موجود أو لا تملك صلاحية الوصول');
             }
             
-            // Check if order can be cancelled
             if (!in_array($order['status'], ['pending', 'processing'])) {
                 throw new Exception('لا يمكن إلغاء الطلب في مرحلته الحالية');
             }
             
-            // Update order status
             $query = "UPDATE orders SET status = 'cancelled', cancelled_at = NOW(), 
                       cancellation_reason = ? WHERE id = ? AND user_id = ?";
             $stmt = $this->conn->prepare($query);
@@ -177,10 +165,8 @@ class MyOrdersAPI {
                 throw new Exception('فشل تحديث حالة الطلب');
             }
             
-            // Restore product stock if needed
             $this->restoreOrderStock($orderId);
             
-            // Log cancellation
             $this->logOrderActivity($orderId, 'cancelled', $reason);
             
             $this->conn->commit();
@@ -205,7 +191,6 @@ class MyOrdersAPI {
         }
         
         try {
-            // Get original order items
             $query = "SELECT product_id, quantity FROM order_items WHERE order_id = ?";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param('i', $orderId);
@@ -219,7 +204,6 @@ class MyOrdersAPI {
                 $productId = (int)$row['product_id'];
                 $quantity = (int)$row['quantity'];
                 
-                // Check if product still exists and has stock
                 $product = $this->getProductInfo($productId);
                 if (!$product) {
                     $failedItems[] = "المنتج غير موجود (ID: $productId)";
@@ -231,7 +215,6 @@ class MyOrdersAPI {
                     continue;
                 }
                 
-                // Add to cart
                 if ($this->addToCart($productId, $quantity)) {
                     $addedCount++;
                 } else {
@@ -337,10 +320,8 @@ class MyOrdersAPI {
     
     private function getOrderTimeline($orderId, $order = null) {
         try {
-            // Check if timeline table exists
             $checkTable = $this->conn->query("SHOW TABLES LIKE 'order_timeline'");
             if ($checkTable->num_rows == 0) {
-                // Table doesn't exist, return default timeline
                 if (!$order) {
                     $order = $this->getOrderById($orderId);
                 }
@@ -370,7 +351,6 @@ class MyOrdersAPI {
                 ];
             }
             
-            // If no timeline exists, create basic one
             if (empty($timeline)) {
                 if (!$order) {
                     $order = $this->getOrderById($orderId);
@@ -381,7 +361,6 @@ class MyOrdersAPI {
             return $timeline;
             
         } catch (Exception $e) {
-            // On error, return default timeline
             if (!$order) {
                 $order = $this->getOrderById($orderId);
             }
@@ -391,7 +370,6 @@ class MyOrdersAPI {
     
     private function getShippingInfo($orderId) {
         try {
-            // Check if shipping table exists
             $checkTable = $this->conn->query("SHOW TABLES LIKE 'order_shipping'");
             if ($checkTable->num_rows == 0) {
                 return null;
@@ -433,7 +411,6 @@ class MyOrdersAPI {
         $stats = [];
         
         try {
-            // Total orders
             $query = "SELECT COUNT(*) as total FROM orders WHERE user_id = ?";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param('i', $this->userId);
@@ -442,7 +419,6 @@ class MyOrdersAPI {
             $row = $result->fetch_assoc();
             $stats['total_orders'] = (int)($row['total'] ?? 0);
             
-            // Total spent
             $query = "SELECT SUM(total) as total_spent FROM orders 
                       WHERE user_id = ? AND payment_status = 'paid'";
             $stmt = $this->conn->prepare($query);
@@ -453,7 +429,6 @@ class MyOrdersAPI {
             $stats['total_spent'] = (float)($row['total_spent'] ?? 0);
             $stats['formatted_total_spent'] = number_format($stats['total_spent'], 2);
             
-            // Orders by status
             $query = "SELECT status, COUNT(*) as count FROM orders 
                       WHERE user_id = ? GROUP BY status";
             $stmt = $this->conn->prepare($query);
@@ -466,7 +441,6 @@ class MyOrdersAPI {
                 $stats['by_status'][$row['status']] = (int)$row['count'];
             }
             
-            // Recent activity
             $query = "SELECT COUNT(*) as recent_orders FROM orders 
                       WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
             $stmt = $this->conn->prepare($query);
@@ -477,7 +451,6 @@ class MyOrdersAPI {
             $stats['recent_orders'] = (int)($row['recent_orders'] ?? 0);
             
         } catch (Exception $e) {
-            // Return default stats on error
             $stats = [
                 'total_orders' => 0,
                 'total_spent' => 0,
@@ -681,7 +654,6 @@ class MyOrdersAPI {
     }
     
     private function logOrderActivity($orderId, $action, $details = '') {
-        // Check if table exists first
         $checkTable = $this->conn->query("SHOW TABLES LIKE 'order_activity'");
         if ($checkTable->num_rows == 0) {
             return;
@@ -712,7 +684,6 @@ class MyOrdersAPI {
     }
     
     private function addToCart($productId, $quantity) {
-        // Check if product exists in cart
         $query = "SELECT quantity FROM user_cart 
                   WHERE user_id = ? AND product_id = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
@@ -721,13 +692,11 @@ class MyOrdersAPI {
         $result = $stmt->get_result();
         
         if ($row = $result->fetch_assoc()) {
-            // Update quantity
             $query = "UPDATE user_cart SET quantity = quantity + ? 
                       WHERE user_id = ? AND product_id = ?";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param('iii', $quantity, $this->userId, $productId);
         } else {
-            // Insert new item
             $query = "INSERT INTO user_cart (user_id, product_id, quantity) 
                       VALUES (?, ?, ?)";
             $stmt = $this->conn->prepare($query);
@@ -745,7 +714,6 @@ class MyOrdersAPI {
     }
 }
 
-// Handle the request
 try {
     if (!isset($_SESSION['user_id'])) {
         echo json_encode(['success' => false, 'message' => 'يجب تسجيل الدخول']);
