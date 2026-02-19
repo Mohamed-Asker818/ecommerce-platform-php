@@ -1,4 +1,3 @@
-// checkout.js - Checkout System
 
 class CheckoutSystem {
     constructor() {
