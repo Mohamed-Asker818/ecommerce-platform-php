@@ -1,5 +1,4 @@
 <?php
-//compare_action.php
 session_start();
 header('Content-Type: application/json');
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -22,7 +21,6 @@ if ($action === 'toggle') {
     echo json_encode(['success' => true, 'status' => 'removed', 'msg' => 'أزيل من المقارنة', 'count' => count($_SESSION['compare'])]);
     exit;
   } else {
-    // limit to 4 items
     if (count($_SESSION['compare']) >= 4) {
       echo json_encode(['success' => false, 'msg' => 'الحد الأقصى للمقارنة هو 4']);
       exit;
