@@ -1,5 +1,4 @@
 <?php
-// cart_action.php
 session_start();
 require_once '../Model/db.php';
 
@@ -19,18 +18,15 @@ class CartAction {
     }
     
     public function handleAction() {
-        // Validate action
         $validActions = ['add', 'minus', 'remove', 'clear'];
         if (!in_array($this->action, $validActions)) {
             return $this->errorResponse('إجراء غير صالح');
         }
         
-        // Check authentication for logged-in users
         if (!$this->isAuthenticated() && !$this->isGuestAction()) {
             return $this->errorResponse('يجب تسجيل الدخول لإجراء هذه العملية');
         }
         
-        // Handle the action
         switch ($this->action) {
             case 'add':
                 return $this->addToCart();
@@ -50,7 +46,6 @@ class CartAction {
             return $this->errorResponse('معرف المنتج غير صالح');
         }
         
-        // Check stock availability
         $stock = $this->getProductStock($this->productId);
         if ($stock <= 0) {
             return $this->errorResponse('المنتج غير متاح حالياً');
@@ -64,13 +59,11 @@ class CartAction {
     }
     
     private function addToUserCart($stock) {
-        // Check current quantity in cart
         $currentQty = $this->getCurrentQuantity();
         if ($currentQty >= $stock) {
             return $this->errorResponse('لا يمكن إضافة كمية أكثر من المخزون المتاح');
         }
         
-        // Add to cart
         if ($currentQty > 0) {
             $query = "UPDATE user_cart SET quantity = quantity + 1 
                       WHERE user_id = ? AND product_id = ?";
@@ -119,15 +112,12 @@ class CartAction {
     }
     
     private function minusFromUserCart() {
-        // Get current quantity
         $currentQty = $this->getCurrentQuantity();
         
         if ($currentQty <= 1) {
-            // Remove the item if quantity is 1 or less
             return $this->removeFromUserCart();
         }
         
-        // Decrease quantity
         $query = "UPDATE user_cart SET quantity = quantity - 1 
                   WHERE user_id = ? AND product_id = ?";
         
@@ -254,7 +244,6 @@ class CartAction {
     }
     
     private function isGuestAction() {
-        // Allow certain actions for guests
         return $this->userId === 0 && in_array($this->action, ['add', 'minus', 'remove', 'clear']);
     }
     
