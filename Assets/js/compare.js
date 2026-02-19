@@ -1,4 +1,3 @@
-
 class CompareSystem {
     constructor() {
         this.compareData = null;
@@ -209,7 +208,6 @@ class CompareSystem {
         const productColumns = document.querySelectorAll('.product-column[draggable="true"]');
         
         productColumns.forEach(column => {
-            // أحداث السحب
             column.addEventListener('dragstart', (e) => {
                 this.isDragging = true;
                 this.dragIndex = parseInt(column.dataset.index);
@@ -228,7 +226,6 @@ class CompareSystem {
                 this.dropIndex = null;
             });
             
-            // أحداث الإفلات
             column.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
@@ -261,17 +258,13 @@ class CompareSystem {
     swapProducts(fromIndex, toIndex) {
         if (!this.compareData || fromIndex === toIndex) return;
         
-        // تبديل المنتجات في المصفوفة
         [this.compareData[fromIndex], this.compareData[toIndex]] = 
         [this.compareData[toIndex], this.compareData[fromIndex]];
         
-        // حفظ التغييرات في Cache
         this.saveToCache('compareData', this.compareData);
         
-        // إعادة رسم الجدول
         this.renderCompareTable();
         
-        // إرسال التحديث للسيرفر (اختياري)
         this.savePositionsToServer();
         
         this.showToast('تم تبديل مواقع المنتجات بنجاح', 'success');
@@ -427,13 +420,11 @@ class CompareSystem {
         const isMaxLimitReached = displayCount >= this.maxProducts;
         
         if (isMaxLimitReached) {
-            // عند الوصول للحد الأقصى - نعرض رسالة بسيطة
             section.innerHTML = `
                 <p>⚠️ تم الوصول للحد الأقصى للمقارنة (${this.maxProducts} منتجات)</p>
             `;
             section.style.display = 'flex';
         } else if (count > displayCount) {
-            // عند وجود منتجات أكثر من المسموح به
             const hiddenCount = count - displayCount;
             section.innerHTML = `
                 <p>⚠️ يتم عرض ${displayCount} من أصل ${count} منتجات</p>
@@ -441,7 +432,6 @@ class CompareSystem {
             `;
             section.style.display = 'flex';
         } else {
-            // حالة عادية - يمكن إضافة المزيد
             const remaining = this.maxProducts - displayCount;
             if (remaining > 0) {
                 section.innerHTML = `
@@ -457,23 +447,19 @@ class CompareSystem {
         }
     }
     
-    // دالة للتحقق عند الضغط على زر إضافة منتجات
     handleAddMoreClick() {
         const count = this.compareData ? this.compareData.length : 0;
         const displayCount = Math.min(count, this.maxProducts);
         
         if (displayCount >= this.maxProducts) {
-            // عرض رسالة toast عند الوصول للحد الأقصى
             this.showMaxLimitToast();
-            return false; // منع الانتقال
+            return false;
         }
         
-        // إذا لم يكن عند الحد الأقصى، انتقل للصفحة الرئيسية
         this.goToHome();
         return true;
     }
     
-    // دالة لعرض رسالة الحد الأقصى
     showMaxLimitToast() {
         const container = document.querySelector(this.selectors.toastContainer) || this.createToastContainer();
         const toast = document.createElement('div');
@@ -490,23 +476,19 @@ class CompareSystem {
         
         container.appendChild(toast);
         
-        // تأثير الظهور
         setTimeout(() => {
             toast.style.animation = 'slideInRight 0.3s ease';
         }, 10);
         
-        // إزالة تلقائية بعد 5 ثواني
         const timeout = setTimeout(() => {
             this.removeToast(toast);
         }, 5000);
         
-        // السماح بالإغلاق اليدوي
         toast.addEventListener('click', () => {
             clearTimeout(timeout);
             this.removeToast(toast);
         });
         
-        // إضافة زر إزالة المنتجات داخل الـ toast
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-some-btn-toast';
         removeBtn.innerHTML = '🗑️ إزالة بعض المنتجات';
@@ -587,7 +569,6 @@ class CompareSystem {
             if (result.success) {
                 this.showToast(result.msg || 'تمت إزالة المنتج من المقارنة', 'success');
                 
-                // تحديث البيانات المحلية
                 if (this.compareData) {
                     this.compareData = this.compareData.filter(item => item.id != productId);
                     this.saveToCache('compareData', this.compareData);
@@ -633,7 +614,6 @@ class CompareSystem {
             if (result.success) {
                 this.showToast(result.msg || 'تمت إزالة جميع المنتجات من المقارنة', 'success');
                 
-                // تحديث البيانات المحلية
                 this.compareData = [];
                 this.clearCache();
                 this.updateUI();
@@ -710,7 +690,6 @@ class CompareSystem {
             });
         }
         
-        // إغلاق رسائل التنبيه عند النقر عليها
         document.addEventListener('click', (e) => {
             const toast = e.target.closest('.toast');
             if (toast) {
@@ -718,22 +697,18 @@ class CompareSystem {
             }
         });
         
-        // حفظ حالة التمرير قبل تحديث الصفحة
         window.addEventListener('beforeunload', () => {
             this.saveScrollPosition();
         });
         
-        // تحديث عدد المنتجات القصوى عند تغيير حجم النافذة
         window.addEventListener('resize', this.handleResize.bind(this));
         
-        // استعادة حالة التمرير عند العودة
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
                 this.restoreScrollPosition();
             }
         });
         
-        // منع الإفلات الافتراضي للعناصر
         document.addEventListener('dragover', (e) => {
             e.preventDefault();
         });
@@ -751,17 +726,15 @@ class CompareSystem {
                 this.maxProducts = newMaxProducts;
                 this.updateMaxProductsDisplay();
                 this.updateAddMoreSection();
-                this.renderCompareTable(); // إعادة الرسم مع/بدون ميزة التبديل
+                this.renderCompareTable();
             }
         }, 250);
     }
     
     initPerformanceOptimizations() {
-        // Debounce عمليات التمرير
         window.addEventListener('scroll', () => {
             clearTimeout(this.debounceTimer);
             this.debounceTimer = setTimeout(() => {
-                // أي عمليات تحتاج للتنفيذ عند التمرير
             }, 100);
         });
     }
@@ -790,7 +763,6 @@ class CompareSystem {
             const images = document.querySelectorAll('img[data-src]');
             images.forEach(img => this.imageObserver.observe(img));
         } else {
-            // Fallback for browsers without IntersectionObserver
             const images = document.querySelectorAll('img[data-src]');
             images.forEach(img => {
                 const src = img.getAttribute('data-src');
@@ -802,7 +774,6 @@ class CompareSystem {
         }
     }
     
-    // Cache Management
     saveToCache(key, data) {
         try {
             this.cache.set(key, data);
@@ -1000,7 +971,6 @@ class CompareSystem {
     }
 }
 
-// Initialize compare system when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.CompareSystem = new CompareSystem();
     window.CompareUI = {
@@ -1018,7 +988,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 
-// إضافة أنماط الحركة ديناميكياً
 if (!document.querySelector('#compare-animation-styles')) {
     const style = document.createElement('style');
     style.id = 'compare-animation-styles';
