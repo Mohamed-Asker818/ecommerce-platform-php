@@ -1,5 +1,4 @@
 <?php
-// cart_ajax.php
 session_start();
 require_once __DIR__ . '/../Model/db.php';
 
