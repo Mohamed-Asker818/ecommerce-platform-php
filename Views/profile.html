@@ -7,13 +7,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap">
     <link rel="stylesheet" href="../Assets/css/checkout.css">
     <link rel="stylesheet" href="../Assets/css/profile.css">
-    <!-- Cropper.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 </head>
 <body>
-    <!-- Container -->
     <div class="profile-wrapper">
-        <!-- Header -->
         <header class="profile-header">
             <h1>👤 الملف الشخصي</h1>
             <div class="header-actions">
@@ -23,9 +20,7 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="profile-main">
-            <!-- Loading State -->
             <div class="loading-section" id="loading-section">
                 <div class="spinner-container">
                     <div class="spinner"></div>
@@ -33,7 +28,6 @@
                 </div>
             </div>
 
-            <!-- Error State -->
             <div class="error-section" id="error-section" style="display: none;">
                 <div class="error-content">
                     <span class="error-icon">⚠️</span>
@@ -43,9 +37,7 @@
                 </div>
             </div>
 
-            <!-- Profile Content -->
             <div class="profile-content" id="profile-content" style="display: none;">
-                <!-- Profile Header -->
                 <section class="profile-header-section">
                     <div class="avatar-container">
                         <img id="user-avatar" 
@@ -68,7 +60,6 @@
                     </div>
                 </section>
 
-                <!-- User Stats -->
                 <section class="stats-section">
                     <h3>📊 إحصائيات</h3>
                     <div class="stats-grid">
@@ -96,9 +87,7 @@
                     </div>
                 </section>
 
-                <!-- Edit Forms -->
                 <div class="forms-container">
-                    <!-- Edit Profile Form -->
                     <section class="form-section">
                         <h3>✏️ تعديل المعلومات الشخصية</h3>
                         <form id="edit-profile-form" class="profile-form">
@@ -126,7 +115,6 @@
                         </form>
                     </section>
 
-                    <!-- Change Password Form -->
                     <section class="form-section">
                         <h3>🔒 تغيير كلمة المرور</h3>
                         <form id="change-password-form" class="profile-form">
@@ -155,7 +143,6 @@
                     </section>
                 </div>
 
-                <!-- Danger Zone -->
                 <section class="danger-zone-section">
                     <h3>⚠️ منطقة الخطر</h3>
                     <div class="danger-zone-content">
@@ -175,14 +162,12 @@
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="profile-footer">
             <p>🔒 بياناتك محمية ومشفرة</p>
             <p class="help-text">للاستفسارات: <a href="tel:0123456789">0123456789</a></p>
         </footer>
     </div>
 
-    <!-- Delete Account Modal -->
     <div class="modal-overlay" id="delete-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -210,7 +195,6 @@
         </div>
     </div>
 
-    <!-- Image Cropper Modal -->
     <div class="modal-overlay" id="cropper-modal" style="display: none;">
         <div class="modal-content cropper-modal-content">
             <div class="modal-header">
@@ -232,9 +216,7 @@
         </div>
     </div>
 
-    <!-- JavaScript Files -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <!-- Cropper.js JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="../Assets/js/profile.js"></script>
 
