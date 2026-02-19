@@ -1,4 +1,3 @@
-// order_success.js
 
 class OrderSuccess {
     constructor() {
@@ -21,7 +20,6 @@ class OrderSuccess {
     }
     
     setupAnimations() {
-        // Hide success animation after delay and show main content
         setTimeout(() => {
             document.getElementById('success-animation').style.display = 'none';
             document.getElementById('main-container').style.display = 'block';
@@ -44,18 +42,14 @@ class OrderSuccess {
     }
     
     bindEvents() {
-        // Print button functionality
         document.querySelector('[onclick*="print"]')?.addEventListener('click', this.printInvoice.bind(this));
         
-        // Download button functionality
         document.querySelector('[onclick*="downloadInvoice"]')?.addEventListener('click', this.downloadInvoice.bind(this));
         
-        // Status update simulation
         this.setupStatusUpdates();
     }
     
     startOrderTracking() {
-        // Simulate order status updates for demo
         if (Math.random() > 0.5) {
             setTimeout(() => {
                 this.simulateStatusUpdate();
@@ -72,17 +66,13 @@ class OrderSuccess {
         const currentIndex = statuses.indexOf(currentStatus);
         
         if (currentIndex < statuses.length - 1) {
-            // Update status with animation
             statusElement.style.animation = 'pulse 1.5s infinite';
             statusElement.querySelector('.status-text').textContent = statuses[currentIndex + 1];
             
-            // Update timeline
             this.updateTimeline(currentIndex + 1);
             
-            // Show notification
             this.showNotification(`تم تحديث حالة طلبك إلى: ${statuses[currentIndex + 1]}`);
             
-            // Remove animation after 3 seconds
             setTimeout(() => {
                 statusElement.style.animation = '';
             }, 3000);
@@ -130,13 +120,11 @@ class OrderSuccess {
         
         document.body.appendChild(notification);
         
-        // Add close functionality
         notification.querySelector('.notification-close').onclick = () => {
             notification.style.animation = 'slideOutRight 0.3s ease';
             setTimeout(() => notification.remove(), 300);
         };
         
-        // Auto remove after 5 seconds
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.style.animation = 'slideOutRight 0.3s ease';
@@ -146,7 +134,6 @@ class OrderSuccess {
     }
     
     setupPrintFunctionality() {
-        // Add print-specific styles
         const printStyle = document.createElement('style');
         printStyle.textContent = `
             @media print {
@@ -184,18 +171,14 @@ class OrderSuccess {
     downloadInvoice() {
         this.showLoading('جاري تحميل الفاتورة...');
         
-        // Simulate download
         setTimeout(() => {
             this.hideLoading();
             this.showNotification('تم تحميل الفاتورة بنجاح');
             
-            // In a real application, you would download a PDF here
-            // window.location.href = `generate_invoice.php?order_id=${this.orderId}`;
         }, 1500);
     }
     
     setupStatusUpdates() {
-        // Add click handlers to timeline steps
         document.querySelectorAll('.timeline-step').forEach(step => {
             step.addEventListener('click', () => {
                 const status = step.querySelector('h4').textContent;
@@ -218,7 +201,6 @@ class OrderSuccess {
     }
     
     setupAutoRefresh() {
-        // Auto-refresh order status every 30 seconds
         setInterval(() => {
             if (document.visibilityState === 'visible') {
                 this.checkForUpdates();
@@ -227,8 +209,6 @@ class OrderSuccess {
     }
     
     checkForUpdates() {
-        // In a real application, you would make an API call here
-        // For now, we'll simulate occasional updates
         if (Math.random() > 0.8) {
             this.simulateStatusUpdate();
         }
@@ -250,16 +230,13 @@ class OrderSuccess {
     }
 }
 
-// Global function for inline onclick
 function downloadInvoice() {
     window.OrderSuccess?.downloadInvoice();
 }
 
-// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.OrderSuccess = new OrderSuccess();
     
-    // Add additional styles for notifications
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideInRight {
