@@ -8,19 +8,14 @@
     <link rel="stylesheet" href="../Assets/css/checkout.css">
 </head>
 <body>
-    <!-- Container -->
     <div class="checkout-wrapper">
-        <!-- Header -->
         <header class="checkout-header">
             <h1>💳 إتمام الطلب</h1>
             <div class="user-info" id="user-info">
-                <!-- سيتم تعبئته بواسطة JavaScript -->
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="checkout-main">
-            <!-- Loading State -->
             <div class="loading-section" id="loading-section">
                 <div class="spinner-container">
                     <div class="spinner"></div>
@@ -28,7 +23,6 @@
                 </div>
             </div>
 
-            <!-- Error State -->
             <div class="error-section" id="error-section" style="display: none;">
                 <div class="error-content">
                     <span class="error-icon">⚠️</span>
@@ -38,9 +32,7 @@
                 </div>
             </div>
 
-            <!-- Checkout Form -->
             <div class="checkout-content" id="checkout-content" style="display: none;">
-                <!-- Customer Information -->
                 <section class="customer-info-section">
                     <h2>معلومات العميل</h2>
                     <form id="checkout-form">
@@ -64,11 +56,9 @@
                     </form>
                 </section>
 
-                <!-- Order Summary -->
                 <section class="order-summary-section">
                     <h2>ملخص الطلب</h2>
                     <div class="order-items" id="order-items">
-                        <!-- سيتم تعبئته بواسطة JavaScript -->
                     </div>
                     <div class="order-totals">
                         <div class="total-row">
@@ -86,7 +76,6 @@
                     </div>
                 </section>
 
-                <!-- Payment Methods -->
                 <section class="payment-methods-section">
                     <h2>طرق الدفع</h2>
                     <div class="payment-methods">
@@ -127,7 +116,6 @@
                         </div>
                     </div>
 
-                    <!-- Wallet Provider Selection -->
                     <div class="wallet-providers" id="wallet-providers" style="display: none;">
                         <h3>اختر مزود المحفظة:</h3>
                         <div class="provider-options">
@@ -156,7 +144,6 @@
                     </div>
                 </section>
 
-                <!-- Actions -->
                 <div class="checkout-actions">
                     <button type="button" class="continue-shopping-btn" onclick="window.location.href='Home.php'">
                         🛍️ متابعة التسوق
@@ -168,14 +155,12 @@
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="checkout-footer">
             <p>🔒 عملية دفع آمنة ومشفرة</p>
             <p class="help-text">للاستفسارات: <a href="tel:0123456789">0123456789</a></p>
         </footer>
     </div>
 
-    <!-- Credit Card Modal -->
     <div class="modal-overlay" id="credit-card-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -237,7 +222,6 @@
         </div>
     </div>
 
-    <!-- Order Success Modal -->
     <div class="modal-overlay" id="order-success-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -248,7 +232,6 @@
                     <div class="success-icon">🎉</div>
                     <p id="success-message">جارٍ إعادة التوجيه إلى صفحة تأكيد الطلب...</p>
                     <div class="order-details" id="success-order-details">
-                        <!-- سيتم تعبئته بواسطة JavaScript -->
                     </div>
                     <div class="success-actions">
                         <button class="view-order-btn" id="view-order-btn">عرض تفاصيل الطلب</button>
@@ -259,7 +242,6 @@
         </div>
     </div>
 
-    <!-- Wallet Confirmation Modal -->
     <div class="modal-overlay" id="wallet-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -290,7 +272,6 @@
         </div>
     </div>
 
-    <!-- JavaScript Files -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="../Assets/js/checkout.js"></script>
 </body>
