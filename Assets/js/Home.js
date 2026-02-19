@@ -1,20 +1,12 @@
-/**
- * Home.js - Luxury Store Core Logic (Enhanced & Unified)
- * Combines all versions with optimizations for performance, UX, and maintainability
- * Includes Notifications, Smooth Scroll, Auto-Review Popup, Category Slider, and Foldable Sidebar
- */
-
 (() => {
     'use strict';
 
-    // --- Mobile Detection & Splash Screen ---
     const initMobileDetection = () => {
         const isMobile = /Mobile|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Windows Phone|BlackBerry|Kindle|Silk|webOS|Tablet/i.test(navigator.userAgent);
         const isBot = /Googlebot|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Crawler|Spider|Robot|Scraper/i.test(navigator.userAgent);
         
         if (isMobile && !isBot) {
             document.documentElement.classList.add('is-mobile');
-            // إضافة كلاس للجسم للتحكم في التنسيقات
             document.body.classList.add('mobile-device');
             const splash = document.getElementById('mobile-splash-overlay');
             if (splash) {
@@ -25,13 +17,10 @@
     };
     
     document.addEventListener('DOMContentLoaded', () => {
-        // Priority 1: Mobile Detection
         initMobileDetection();
         
-        // Priority 2: Essential UI
         initSmoothTransitions();
         
-        // Priority 3: Defer non-critical effects
         requestIdleCallback(() => {
             const exploreBtn = document.querySelector('.btn-hero-explore');
             if (exploreBtn) {
@@ -51,9 +40,7 @@
         });
     });
 
-    // --- Smooth Transitions (SPA-like) ---
     const initSmoothTransitions = () => {
-        // Handle back/forward buttons without reload
         window.addEventListener('popstate', (e) => {
             loadPage(window.location.href, false);
         });
@@ -62,7 +49,6 @@
             const wrapper = document.querySelector('.app-wrapper');
             if (wrapper) wrapper.style.opacity = '0.6';
             
-            // Show a small progress bar if possible
             const loaderBar = document.querySelector('.loader-bar');
             if (loaderBar) {
                 loaderBar.parentElement.parentElement.style.display = 'flex';
@@ -80,7 +66,6 @@
                     const newContent = doc.querySelector('.app-wrapper');
                     
                     if (newContent && wrapper) {
-                        // Update content
                         wrapper.innerHTML = newContent.innerHTML;
                         document.title = doc.title;
                         
@@ -90,19 +75,16 @@
                         
                         wrapper.style.opacity = '1';
                         
-                        // Re-initialize scripts and elements
                         cacheElements();
                         if (typeof initAll === 'function') {
                             initAll();
                         } else {
-                            // Fallback re-init if initAll is not global
-                            window.location.reload(); // If we can't re-init, reload is safer
+                            window.location.reload(); 
                             return;
                         }
                         
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         
-                        // Hide loader if shown
                         if (loaderBar) {
                             loaderBar.parentElement.parentElement.style.display = 'none';
                         }
@@ -130,7 +112,6 @@
         });
     };
 
-    // --- Application State ---
     const STATE = {
         phpVars: {},
         page: 1,
@@ -145,10 +126,8 @@
         }
     };
 
-    // --- DOM Elements Cache ---
     const elements = {};
     
-    // Helper to cache elements
     const cacheElements = () => {
         const ids = [
             'main-header', 'products-container', 'infinite-scroll-trigger',
@@ -173,7 +152,6 @@
         });
     };
 
-    // --- Utility Functions ---
     const q = id => document.getElementById(id);
     
     const ce = (tag, props = {}) => {
@@ -373,36 +351,29 @@
         };
     };
 
-    // --- Smooth Scroll for Categories ---
     window.filterAndScroll = (categoryId) => {
-        // إخفاء الشريط الجانبي للأجهزة المحمولة
         if (window.innerWidth < 992 && elements['filter-sidebar']) {
             elements['filter-sidebar'].classList.remove('active');
         }
         
-        // تحديث حالة الفلاتر
         STATE.filters.category = categoryId;
-        STATE.page = 1; // العودة للصفحة الأولى
+        STATE.page = 1; 
         STATE.hasNextPage = true;
 
-        // تحديث الـ URL بدون إعادة تحميل الصفحة
         const url = new URL(window.location);
         if (categoryId) url.searchParams.set('category', categoryId);
         else url.searchParams.delete('category');
         window.history.pushState({}, '', url);
         
-        // تحديد الفئة المختارة في الشريط الجانبي
         const categoryInputs = document.querySelectorAll('input[name="category"]');
         categoryInputs.forEach(input => {
             input.checked = input.value === String(categoryId);
         });
         
-        // إظهار مؤشر التحميل على المنتجات
         const productsContainer = elements['products-container'];
         if (productsContainer) {
             productsContainer.classList.add('loading');
             
-            // إضافة فقاعة تحميل مؤقتة
             const loadingDiv = ce('div', {
                 className: 'products-loading-overlay',
                 innerHTML: `
@@ -411,21 +382,17 @@
                 `
             });
             
-            // حفظ المحتوى الحالي مؤقتاً
             const currentContent = productsContainer.innerHTML;
             productsContainer.innerHTML = '';
             productsContainer.appendChild(loadingDiv);
             
-            // تحميل المنتجات الجديدة
             loadProducts(true).then(() => {
-                // إخفاء مؤشر التحميل بعد تأخير قصير
                 setTimeout(() => {
                     productsContainer.classList.remove('loading');
                     
-                    // التمرير إلى المنتجات
                     const productSection = document.getElementById('products-container');
                     if (productSection) {
-                        const offset = 120; // تعويض للرأس الثابت
+                        const offset = 120; 
                         const elementPosition = productSection.getBoundingClientRect().top;
                         const offsetPosition = elementPosition + window.pageYOffset - offset;
                         
@@ -436,7 +403,6 @@
                     }
                 }, 300);
             }).catch(error => {
-                // في حالة الخطأ، استعادة المحتوى السابق
                 console.error('Error loading products:', error);
                 productsContainer.innerHTML = currentContent;
                 productsContainer.classList.remove('loading');
@@ -445,7 +411,6 @@
         }
     };
 
-    // --- تهيئة سلايدر الفئات ---
     const initCategorySlider = () => {
         const categorySliderContainer = document.querySelector('.category-swiper');
         if (!categorySliderContainer) return;
@@ -456,9 +421,9 @@
                     const categorySwiper = new Swiper('.category-swiper', {
                         direction: 'horizontal',
                         loop: true,
-                        slidesPerView: 1.5, // إظهار عنصر ونصف لزيادة حجم الصورة وتوضيح وجود عناصر أخرى
+                        slidesPerView: 1.5, 
                         spaceBetween: 15,
-                        centeredSlides: true, // توسيط العنصر النشط
+                        centeredSlides: true, 
                         grabCursor: true,
                         autoplay: {
                             delay: 4000,
@@ -505,14 +470,12 @@
         }
     };
 
-    // --- وظيفة طي/فتح السايدبار ---
     const initFoldableSidebar = () => {
         const toggleFoldBtn = elements['toggle-fold-sidebar'];
         const filterSidebar = elements['filter-sidebar'];
         
         if (!toggleFoldBtn || !filterSidebar) return;
         
-        // التحقق من حالة الطي المحفوظة
         const isFolded = localStorage.getItem('sidebarFolded') === 'true';
         
         const mainLayout = document.querySelector('.main-layout');
@@ -532,7 +495,6 @@
             const isFoldedNow = filterSidebar.classList.contains('folded');
             
             if (isFoldedNow) {
-                // فتح السايدبار
                 filterSidebar.classList.remove('folded');
                 if (mainLayout) mainLayout.classList.remove('sidebar-folded');
                 toggleFoldBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
@@ -2769,11 +2731,7 @@ if (document.getElementById('year')) {
     }
 })();
 
-/* ============================================================
-   LUXURY ENHANCEMENTS LOGIC (Integrated)
-   ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Parallax Floating Elements
     const initParallax = () => {
         const container = document.createElement('div');
         container.className = 'parallax-container';
