@@ -1,10 +1,8 @@
 <?php
-// paypal_return.php (محسّن)
 session_start();
 include __DIR__ . '/db.php';
 $cfg = include __DIR__ . '/config.php';
 
-// تأكد من وجود autoload
 if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
     error_log("Missing composer autoload at vendor/autoload.php");
     die("خطاء داخلي: مكتبات PayPal غير مثبتة.");
@@ -20,16 +18,14 @@ $PAYPAL_CLIENT_ID = $cfg->PAYPAL_CLIENT_ID ?? '';
 $PAYPAL_SECRET = $cfg->PAYPAL_SECRET ?? '';
 $SITE_URL = rtrim($cfg->SITE_URL ?? '', '/');
 
-// تحديد وضع الـ environment (استخدم sandbox حسب config أو ضع شرطك)
 $isSandbox = ($cfg->PAYPAL_ENV ?? 'sandbox') === 'sandbox';
 $environment = $isSandbox
     ? new SandboxEnvironment($PAYPAL_CLIENT_ID, $PAYPAL_SECRET)
     : new ProductionEnvironment($PAYPAL_CLIENT_ID, $PAYPAL_SECRET);
 $client = new PayPalHttpClient($environment);
 
-// params
 $order_id = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
-$token = isset($_GET['token']) ? $_GET['token'] : ''; // PayPal returns token param (order id)
+$token = isset($_GET['token']) ? $_GET['token'] : ''; 
 $expected_currency = isset($_GET['currency']) ? strtoupper($_GET['currency']) : null;
 $expected_amount = isset($_GET['amount']) ? (float)$_GET['amount'] : null;
 
@@ -44,7 +40,6 @@ if (!$order_id || !$token) {
     die("Invalid return parameters.");
 }
 
-// fetch order from DB
 $stmt = $conn->prepare("SELECT id, total, currency, payment_status, user_id FROM orders WHERE id = ?");
 if (!$stmt) {
     $log("DB prepare failed: " . $conn->error);
@@ -61,23 +56,18 @@ if (!$orderRow) {
     die("الطلب غير موجود.");
 }
 
-// if expected currency/amount not provided, use DB values as reference
 $ref_amount = $expected_amount !== null ? (float)$expected_amount : (float)$orderRow['total'];
 $ref_currency = $expected_currency !== null ? strtoupper($expected_currency) : strtoupper($orderRow['currency']);
 
-// Attempt to capture the order using token (token usually == orderId returned by PayPal)
 try {
     $request = new OrdersCaptureRequest($token);
     $request->prefer('return=representation');
     $response = $client->execute($request);
 
-    // store raw paypal response for auditing
     $rawResponse = json_encode($response, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     $log("Capture response for order {$order_id}: " . substr($rawResponse, 0, 2000));
 
-    // Extract capture data safely
     $status = $response->result->status ?? null;
-    // try to find capture id and captured amount/currency
     $captureId = null;
     $capturedAmount = null;
     $capturedCurrency = null;
@@ -91,28 +81,22 @@ try {
                         $capturedAmount = $cap->amount->value ?? $capturedAmount;
                         $capturedCurrency = strtoupper($cap->amount->currency_code ?? $capturedCurrency);
                     }
-                    // break after first capture found
                     break 2;
                 }
             }
         }
     }
 
-    // If no capture info found, fallback to order-level amount (not ideal)
     if ($capturedAmount === null && !empty($response->result->purchase_units[0]->amount)) {
         $capturedAmount = $response->result->purchase_units[0]->amount->value ?? $capturedAmount;
         $capturedCurrency = strtoupper($response->result->purchase_units[0]->amount->currency_code ?? $capturedCurrency);
     }
 
-    // Normalize numeric
     $capturedAmount = $capturedAmount !== null ? (float)$capturedAmount : null;
 
-    // If capture completed -> mark paid
     if (strtoupper($status) === 'COMPLETED' || strtoupper($status) === 'APPROVED') {
-        // Begin DB transaction
         $conn->begin_transaction();
         try {
-            // lock order row
             $lockStmt = $conn->prepare("SELECT payment_status, user_id FROM orders WHERE id = ? FOR UPDATE");
             $lockStmt->bind_param("i", $order_id);
             $lockStmt->execute();
@@ -126,21 +110,17 @@ try {
                 exit;
             }
 
-            // optional: compare amounts & currency (tolerance for minor rounding)
             $ok_amount = true;
             if ($capturedAmount !== null) {
                 $diff = abs($capturedAmount - (float)$ref_amount);
-                if ($diff > 0.50) { // configurable tolerance
+                if ($diff > 0.50) { 
                     $ok_amount = false;
                 }
             }
             if ($capturedCurrency !== null && strtoupper($capturedCurrency) !== strtoupper($ref_currency)) {
-                // currency mismatch -> log and proceed cautiously
                 $log("Currency mismatch for order {$order_id}. expected={$ref_currency} got={$capturedCurrency}");
             }
 
-            // update order: payment_status, record txn id and raw response
-            // NOTE: ensure orders table has provider_txn_id and payment_provider_response columns or adjust SQL.
             $upd = $conn->prepare("UPDATE orders SET payment_status = 'paid', status = 'processing', provider_txn_id = ?, payment_provider_response = ? WHERE id = ? AND payment_status != 'paid'");
             if ($upd) {
                 $upd->bind_param("ssi", $captureIdParam, $rawRespParam, $order_id);
@@ -150,11 +130,9 @@ try {
                 $upd->close();
             } else {
                 $log("Prepare failed updating order: " . $conn->error);
-                // fallback: basic update
                 $conn->query("UPDATE orders SET payment_status = 'paid', status = 'processing' WHERE id = " . intval($order_id));
             }
 
-            // deduct stock
             $si = $conn->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
             $si->bind_param("i", $order_id);
             $si->execute();
@@ -172,7 +150,6 @@ try {
             $updP->close();
             $si->close();
 
-            // clear user's cart
             if (!empty($user_id_locked)) {
                 $del = $conn->prepare("DELETE FROM user_cart WHERE user_id = ?");
                 $del->bind_param("i", $user_id_locked);
@@ -195,7 +172,6 @@ try {
             exit;
         }
     } else {
-        // not completed
         $log("PayPal capture status not completed for order {$order_id}. status=" . ($status ?? 'null'));
         echo "لم تكتمل عملية الدفع عبر PayPal. الحالة: " . htmlspecialchars($status ?? 'unknown');
     }
