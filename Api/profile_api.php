@@ -1,5 +1,4 @@
 <?php
-// profile_api.php
 session_start();
 require_once '../Model/db.php';
 
@@ -47,14 +46,9 @@ class ProfileAPI {
             $result = $stmt->get_result();
             
             if ($row = $result->fetch_assoc()) {
-                // Format dates
                 $row['created_at_formatted'] = date('Y-m-d', strtotime($row['created_at']));
                 $row['created_at_readable'] = $this->getTimeAgo($row['created_at']);
-                
-                // Get avatar URL - تعديل هنا
                 $row['avatar_url'] = $this->getAvatarUrl($row['avatar']);
-                
-                // Get stats
                 $row['stats'] = $this->getUserStats();
                 
                 return [
@@ -85,12 +79,10 @@ class ProfileAPI {
             $email = trim($data['email']);
             $phone = isset($data['phone']) ? trim($data['phone']) : '';
             
-            // Validate email
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 return $this->errorResponse('البريد الإلكتروني غير صالح');
             }
             
-            // Check if email already exists (excluding current user)
             $checkQuery = "SELECT id FROM users WHERE email = ? AND id != ?";
             $checkStmt = $this->conn->prepare($checkQuery);
             $checkStmt->bind_param('si', $email, $this->userId);
@@ -101,7 +93,6 @@ class ProfileAPI {
                 return $this->errorResponse('البريد الإلكتروني مستخدم بالفعل');
             }
             
-            // Update user info
             $query = "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param('sssi', $name, $email, $phone, $this->userId);
@@ -140,7 +131,6 @@ class ProfileAPI {
             $newPassword = trim($data['new_password']);
             $confirmPassword = trim($data['confirm_password']);
             
-            // Get current password hash
             $query = "SELECT password FROM users WHERE id = ?";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param('i', $this->userId);
@@ -148,12 +138,10 @@ class ProfileAPI {
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
             
-            // Verify current password (using MD5 as in your original code)
             if (md5($currentPassword) !== $user['password']) {
                 return $this->errorResponse('كلمة المرور الحالية غير صحيحة');
             }
             
-            // Validate new password
             if (strlen($newPassword) < 6) {
                 return $this->errorResponse('كلمة المرور الجديدة قصيرة جداً (6 أحرف على الأقل)');
             }
@@ -162,7 +150,6 @@ class ProfileAPI {
                 return $this->errorResponse('كلمات المرور غير متطابقة');
             }
             
-            // Update password
             $newPasswordHash = md5($newPassword);
             $updateQuery = "UPDATE users SET password = ? WHERE id = ?";
             $updateStmt = $this->conn->prepare($updateQuery);
@@ -190,18 +177,15 @@ class ProfileAPI {
             
             $file = $_FILES['avatar'];
             
-            // Validate file type
             $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!in_array($file['type'], $allowedTypes)) {
                 return $this->errorResponse('نوع الصورة غير مدعوم');
             }
             
-            // Validate file size (max 5MB)
             if ($file['size'] > 5 * 1024 * 1024) {
                 return $this->errorResponse('حجم الصورة كبير جداً (الحد الأقصى 5MB)');
             }
             
-            // Get current avatar to delete later
             $currentAvatarQuery = "SELECT avatar FROM users WHERE id = ?";
             $currentStmt = $this->conn->prepare($currentAvatarQuery);
             $currentStmt->bind_param('i', $this->userId);
@@ -210,20 +194,16 @@ class ProfileAPI {
             $currentUser = $currentResult->fetch_assoc();
             $oldAvatar = $currentUser['avatar'];
             
-            // Generate new filename
             $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
             $newFilename = 'user_' . $this->userId . '_' . time() . '.' . $extension;
             $uploadPath = '../Assets/uploads/avatars/' . $newFilename;
             
-            // Move uploaded file
             if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-                // Update database
                 $updateQuery = "UPDATE users SET avatar = ? WHERE id = ?";
                 $updateStmt = $this->conn->prepare($updateQuery);
                 $updateStmt->bind_param('si', $newFilename, $this->userId);
                 
                 if ($updateStmt->execute()) {
-                    // Delete old avatar if not default
                     if ($oldAvatar && $oldAvatar !== 'default_avatar.png' && file_exists('../Assets/uploads/avatars/' . $oldAvatar)) {
                         unlink('../Assets/uploads/avatars/' . $oldAvatar);
                     }
@@ -253,7 +233,6 @@ class ProfileAPI {
             
             $password = trim($data['password']);
             
-            // Get user data
             $query = "SELECT avatar, password FROM users WHERE id = ?";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param('i', $this->userId);
@@ -261,21 +240,17 @@ class ProfileAPI {
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
             
-            // Verify password
             if (md5($password) !== $user['password']) {
                 return $this->errorResponse('كلمة المرور غير صحيحة');
             }
             
-            // Start transaction
             $this->conn->begin_transaction();
             
             try {
-                // Delete avatar file if not default
                 if ($user['avatar'] && $user['avatar'] !== 'default_avatar.png' && file_exists('../Assets/uploads/avatars/' . $user['avatar'])) {
                     unlink('../Assets/uploads/avatars/' . $user['avatar']);
                 }
                 
-                // Delete user
                 $deleteQuery = "DELETE FROM users WHERE id = ?";
                 $deleteStmt = $this->conn->prepare($deleteQuery);
                 $deleteStmt->bind_param('i', $this->userId);
@@ -284,10 +259,8 @@ class ProfileAPI {
                     throw new Exception('فشل حذف الحساب');
                 }
                 
-                // Commit transaction
                 $this->conn->commit();
                 
-                // Destroy session
                 session_destroy();
                 
                 return [
@@ -307,17 +280,12 @@ class ProfileAPI {
     }
     
     private function getAvatarUrl($avatar) {
-        // Check if user has a custom avatar (not default and file exists)
         if (!empty($avatar) && $avatar !== 'default_avatar.png') {
             $avatarPath = '../Assets/uploads/avatars/' . $avatar;
-            
-            // If file exists, return it with timestamp to prevent caching issues
             if (file_exists($avatarPath)) {
                 return $avatarPath . '?t=' . time();
             }
         }
-        
-        // Return default avatar if no custom avatar exists
         return '../Assets/uploads/avatars/default_avatar.png';
     }
     
@@ -341,7 +309,6 @@ class ProfileAPI {
     private function getUserStats() {
         $stats = [];
         
-        // Get total orders
         $ordersQuery = "SELECT COUNT(*) as total FROM orders WHERE user_id = ?";
         $ordersStmt = $this->conn->prepare($ordersQuery);
         $ordersStmt->bind_param('i', $this->userId);
@@ -349,7 +316,6 @@ class ProfileAPI {
         $ordersResult = $ordersStmt->get_result();
         $stats['total_orders'] = $ordersResult->fetch_assoc()['total'] ?? 0;
         
-        // Get total spent
         $spentQuery = "SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE user_id = ? AND payment_status = 'paid'";
         $spentStmt = $this->conn->prepare($spentQuery);
         $spentStmt->bind_param('i', $this->userId);
@@ -381,7 +347,6 @@ class ProfileAPI {
     }
 }
 
-// Handle the request
 try {
     $profileAPI = new ProfileAPI($conn);
     $response = $profileAPI->handleRequest();
