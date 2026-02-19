@@ -40,7 +40,6 @@ class CheckoutSystem {
         this.bindEvents();
         this.setupPaymentMethodToggle();
         
-        // إضافة listener للبطاقة مباشرة
         const cardRadio = document.getElementById('payment-card');
         if (cardRadio) {
             cardRadio.addEventListener('change', () => {
@@ -52,7 +51,6 @@ class CheckoutSystem {
                 }
             });
             
-            // إذا كانت البطاقة محددة افتراضياً، افتح النافذة
             if (cardRadio.checked) {
                 setTimeout(() => {
                     this.showCreditCardModal();
@@ -176,7 +174,6 @@ class CheckoutSystem {
         if (nameInput && this.userData.name) nameInput.value = this.userData.name;
         if (phoneInput && this.userData.phone) phoneInput.value = this.userData.phone;
         
-        // محاولة الحصول على العنوان من localStorage
         try {
             const savedAddress = localStorage.getItem('user_address');
             if (addressInput && savedAddress) {
@@ -217,7 +214,6 @@ class CheckoutSystem {
     bindEvents() {
         console.log('🔗 ربط الأحداث...');
         
-        // زر تأكيد الطلب الرئيسي
         const confirmBtn = document.querySelector(this.selectors.confirmOrderBtn);
         if (confirmBtn) {
             confirmBtn.addEventListener('click', (e) => {
@@ -227,7 +223,6 @@ class CheckoutSystem {
             });
         }
         
-        // زر تأكيد الدفع في نافذة بطاقة الائتمان
         const cardConfirmBtn = document.querySelector('#credit-card-form .confirm-btn');
         if (cardConfirmBtn) {
             cardConfirmBtn.addEventListener('click', (e) => {
@@ -237,7 +232,6 @@ class CheckoutSystem {
             });
         }
         
-        // زر تأكيد الدفع في نافذة المحفظة
         const walletConfirmBtn = document.querySelector(this.selectors.modalConfirmBtn);
         if (walletConfirmBtn) {
             walletConfirmBtn.addEventListener('click', (e) => {
@@ -247,7 +241,6 @@ class CheckoutSystem {
             });
         }
         
-        // زر إظهار/إخفاء CVV
         const showCvvBtn = document.querySelector('.show-cvv-btn');
         if (showCvvBtn) {
             showCvvBtn.addEventListener('click', (e) => {
@@ -275,7 +268,6 @@ class CheckoutSystem {
             }
         });
         
-        // إغلاق النوافذ بزر Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.hideCreditCardModal();
@@ -392,8 +384,6 @@ class CheckoutSystem {
             }
             
             if (cardData) {
-                // لا ترسل بيانات البطاقة الحساسة - هذا فقط للتوضيح
-                // في التطبيق الحقيقي، استخدم بوابة دفع آمنة
                 formData.append('card_last_four', cardData.card_number ? cardData.card_number.slice(-4) : '');
             }
             
@@ -623,17 +613,14 @@ class CheckoutSystem {
     }
     
     validateCardNumber(cardNumber) {
-        // إزالة المسافات والتحقق إذا كان رقماً
         if (!/^\d+$/.test(cardNumber)) {
             return false;
         }
 
-        // التحقق من الطول (13-19 رقم)
         if (cardNumber.length < 13 || cardNumber.length > 19) {
             return false;
         }
 
-        // التحقق باستخدام خوارزمية لوهن
         return this.luhnCheck(cardNumber);
     }
     
@@ -1000,18 +987,15 @@ window.CheckoutUI = {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 تحميل صفحة الدفع...');
     
-    // تأخير بسيط لضمان تحميل جميع العناصر
     setTimeout(() => {
         window.CheckoutSystem = new CheckoutSystem();
         console.log('✅ نظام الدفع جاهز للعمل');
     }, 100);
 });
 
-// فحص الصفحة عند التحميل
 window.addEventListener('load', function() {
     console.log('🔍 فحص عناصر الصفحة...');
     
-    // فحص الأزرار المهمة
     const importantElements = [
         { id: 'confirm-order-btn', name: 'زر تأكيد الطلب' },
         { id: 'credit-card-modal', name: 'نافذة بطاقة الائتمان' },
