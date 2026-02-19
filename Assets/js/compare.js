@@ -1,4 +1,3 @@
-// compare.js - Enhanced Product Comparison System with Product Switching Feature
 
 class CompareSystem {
     constructor() {
@@ -42,17 +41,13 @@ class CompareSystem {
     
     async init() {
         try {
-            // استعادة حالة التمرير إذا عدنا من صفحة أخرى
             this.restoreScrollPosition();
-            
-            // تحقق من Cache أولاً
             const cachedData = this.getFromCache('compareData');
             if (cachedData && cachedData.length > 0) {
                 this.compareData = cachedData;
                 this.updateUI();
             }
             
-            // ثم حمل البيانات المحدثة من السيرفر
             await this.loadCompareData();
             this.bindEvents();
             this.initPerformanceOptimizations();
@@ -89,7 +84,6 @@ class CompareSystem {
             console.error('Error loading compare data:', error);
             this.showError('حدث خطأ في تحميل بيانات المقارنة. يرجى المحاولة مرة أخرى.');
             
-            // استخدم البيانات المخزنة في Cache كبديل
             const cachedData = this.getFromCache('compareData');
             if (cachedData) {
                 this.compareData = cachedData;
@@ -123,20 +117,16 @@ class CompareSystem {
             return;
         }
         
-        // تطبيق حد المنتجات بناءً على حجم الشاشة
         const displayItems = items.slice(0, this.maxProducts);
         
         const tableHTML = this.createCompareTableHTML(displayItems);
         container.innerHTML = tableHTML;
         
-        // إضافة تأثيرات بعد الرسم
         this.addTableAnimations();
         
-        // تحسين تحميل الصور
         this.initLazyLoading();
         
-        // إضافة أحداث السحب والإفلات للتبديل
-        if (window.innerWidth > 768) { // فقط في الديسكتوب
+        if (window.innerWidth > 768) {
             this.initProductSwitching();
         }
     }
