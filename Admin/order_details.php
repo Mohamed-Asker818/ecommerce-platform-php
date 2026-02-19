@@ -24,7 +24,6 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $order_id = intval($_GET['id']);
 
 
-// fetch order (use prepared + stmt_get_one)
 $st = $conn->prepare("SELECT id, customer_name, phone, address, total, status, order_date, notes FROM orders WHERE id=? LIMIT 1");
 if (!$st) {
     http_response_code(500);
@@ -43,7 +42,6 @@ if (!$order) {
 }
 
 
-// fetch items
 $it = $conn->prepare("SELECT oi.product_id, oi.quantity, oi.price, COALESCE(p.name,'') AS name, COALESCE(p.image,'') AS image FROM order_items oi LEFT JOIN products p ON p.id=oi.product_id WHERE oi.order_id=?");
 if (!$it) {
     http_response_code(500);
