@@ -1,8 +1,7 @@
-// login.js - Advanced Login System with Animations
 
 class LoginSystem {
     constructor() {
-        this.currentMode = 'login'; // 'login', 'forgot', 'reset'
+        this.currentMode = 'login'; 
         this.isLoading = false;
         this.otpVerified = false;
         
@@ -186,20 +185,15 @@ class LoginSystem {
             }
         });
         
-        // Real-time validation
         this.setupRealTimeValidation();
         
-        // OTP input handling
         this.setupOTPInputs();
         
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ctrl + Enter to submit
             if (e.ctrlKey && e.key === 'Enter') {
                 this.handleFormSubmit(this.getActiveForm());
             }
             
-            // Escape to close modals/errors
             if (e.key === 'Escape') {
                 this.hideError();
                 this.hideSuccess();
