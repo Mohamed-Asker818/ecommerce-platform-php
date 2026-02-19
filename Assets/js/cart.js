@@ -1,4 +1,3 @@
-// cart.js - Pure JavaScript Cart System
 
 class CartSystem {
     constructor() {
