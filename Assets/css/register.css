@@ -1,12 +1,3 @@
-/* register.css - Complete with animations and visual effects
-   === Modified to keep original styling but fix layout/scroll issues ===
-   - Keep your original rules and animations
-   - Change: body vertical centering -> flex-start (prevents stretched centered container)
-   - Change: register-wrapper max-width -> 420px for better balance
-   - Change: register-container -> flex column, overflow:hidden, max-height limited
-   - Change: register-form -> flex:1; overflow-y:auto; add scroll hint pseudo-element
-*/
-
 * {
     margin: 0;
     padding: 0;
