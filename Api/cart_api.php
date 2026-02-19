@@ -1,5 +1,4 @@
 <?php
-// cart_api.php
 session_start();
 require_once '../Model/db.php';
 
@@ -29,7 +28,6 @@ class CartAPI {
         $cartCount = 0;
         
         if ($this->userId > 0) {
-            // Logged in user - get from database
             $query = "SELECT COUNT(*) as count FROM user_cart WHERE user_id = ?";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param('i', $this->userId);
@@ -40,7 +38,6 @@ class CartAPI {
                 $cartCount = $row['count'];
             }
         } elseif (isset($_SESSION['cart'])) {
-            // Guest user - get from session
             $cartCount = count($_SESSION['cart']);
         }
         
@@ -58,7 +55,6 @@ class CartAPI {
     }
 }
 
-// Handle the request
 try {
     $cartAPI = new CartAPI($conn);
     $response = $cartAPI->handleRequest();
