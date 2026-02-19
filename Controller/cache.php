@@ -1,16 +1,10 @@
 <?php
-// lib/cache.php
-
-/**
- * Simple file-based caching class.
- * Uses a dedicated directory for cache files.
- */
 class SimpleCache
 {
     private $cacheDir;
-    private $defaultTTL; // Time To Live in seconds
+    private $defaultTTL; 
 
-    public function __construct($defaultTTL = 3600) // Default 1 hour
+    public function __construct($defaultTTL = 3600) 
     {
         $this->cacheDir = __DIR__ . '/../Cache/';
         $this->defaultTTL = $defaultTTL;
@@ -22,19 +16,11 @@ class SimpleCache
 
     private function getCacheFilePath($key)
     {
-        // Sanitize key to be a valid filename
         $filename = preg_replace('/[^a-zA-Z0-9_]/', '_', $key);
         return $this->cacheDir . $filename . '.cache';
     }
 
-    /**
-     * Stores data in the cache.
-     *
-     * @param string $key The key under which to store the data.
-     * @param mixed $data The data to store.
-     * @param int|null $ttl Time to live in seconds. If null, uses defaultTTL.
-     * @return bool True on success, false on failure.
-     */
+    
     public function set($key, $data, $ttl = null)
     {
         $ttl = $ttl ?? $this->defaultTTL;
@@ -45,12 +31,7 @@ class SimpleCache
         return file_put_contents($filePath, $content, LOCK_EX) !== false;
     }
 
-    /**
-     * Retrieves data from the cache.
-     *
-     * @param string $key The key of the data to retrieve.
-     * @return mixed The cached data, or false if the key does not exist or has expired.
-     */
+    
     public function get($key)
     {
         $filePath = $this->getCacheFilePath($key);
@@ -67,13 +48,11 @@ class SimpleCache
         $cached = @unserialize($content);
 
         if ($cached === false || !isset($cached['expiry']) || !isset($cached['data'])) {
-            // Corrupted cache file
             @unlink($filePath);
             return false;
         }
 
         if ($cached['expiry'] < time()) {
-            // Cache expired
             @unlink($filePath);
             return false;
         }
@@ -81,12 +60,7 @@ class SimpleCache
         return $cached['data'];
     }
 
-    /**
-     * Deletes a key from the cache.
-     *
-     * @param string $key The key to delete.
-     * @return bool True on success, false on failure.
-     */
+    
     public function delete($key)
     {
         $filePath = $this->getCacheFilePath($key);
