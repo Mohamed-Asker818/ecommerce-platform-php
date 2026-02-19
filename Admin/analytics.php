@@ -105,16 +105,14 @@ if ($stmtTop) {
     $stmtTop->close();
 }
 
-// ===== Handle export requests (CSV / PDF) - same file handles exports when ?export=csv/pdf =====
 if (isset($_GET['export']) && in_array($_GET['export'], ['csv', 'pdf'])) {
     $format = $_GET['export'];
     $fnSafe = preg_replace('/[^a-z0-9_\\-]/i', '_', "analytics_{$start}_{$end}");
 
     if ($format === 'csv') {
-        // CSV download
         header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="' . $fnSafe . '.csv"');
-        echo "\xEF\xBB\xBF"; // BOM for Excel UTF-8
+        echo "\xEF\xBB\xBF"; 
         $out = fopen('php://output', 'w');
         fputcsv($out, ['Metric', 'Value']);
         fputcsv($out, ['Start Date', $start]);
@@ -138,7 +136,6 @@ if (isset($_GET['export']) && in_array($_GET['export'], ['csv', 'pdf'])) {
     }
 
     if ($format === 'pdf') {
-        // Try to use Dompdf if installed
         $html = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>body{font-family:DejaVu Sans, \"Segoe UI\", Tahoma, Arial;direction:rtl}</style></head><body>';
         $html .= "<h2>تقرير تحليلات المتجر</h2>";
         $html .= "<div>الفترة: <strong>{$start} إلى {$end}</strong></div>";
@@ -159,7 +156,6 @@ if (isset($_GET['export']) && in_array($_GET['export'], ['csv', 'pdf'])) {
         $html .= '</body></html>';
 
         if (class_exists('Dompdf\\Dompdf')) {
-            // Use Dompdf (server-side) if available
             try {
                 $dompdf = new Dompdf\Dompdf();
                 $dompdf->loadHtml($html);
@@ -170,17 +166,13 @@ if (isset($_GET['export']) && in_array($_GET['export'], ['csv', 'pdf'])) {
                 echo $dompdf->output();
                 exit;
             } catch (Exception $e) {
-                // fallback to HTML
             }
         }
 
-        // Fallback: serve printable HTML and suggest user save as PDF from browser
         header('Content-Type: text/html; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $fnSafe . '.html"');
         echo $html;
         exit;
     }
 }
-
-// ===== Page output (interactive UI) =====
 ?>
