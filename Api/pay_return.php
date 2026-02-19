@@ -1,5 +1,4 @@
 <?php
-// pay_return.php
 session_start();
 include 'db.php';
 $cfg = include __DIR__ . '/config.php';
@@ -13,10 +12,8 @@ if ($order_id && $session_id) {
   try {
     $session = \Stripe\Checkout\Session::retrieve($session_id);
     if ($session && ($session->payment_status === 'paid' || $session->status === 'complete')) {
-      // Start DB transaction to atomically mark paid + deduct stock + clear cart
       $conn->begin_transaction();
       try {
-          // lock the order row
           $stmt = $conn->prepare("SELECT payment_status, user_id FROM orders WHERE id = ? FOR UPDATE");
           $stmt->bind_param("i", $order_id);
           $stmt->execute();
@@ -30,13 +27,11 @@ if ($order_id && $session_id) {
               exit;
           }
 
-          // mark order paid
           $upd = $conn->prepare("UPDATE orders SET payment_status = 'paid', status = 'processing' WHERE id = ? AND payment_status != 'paid'");
           $upd->bind_param("i", $order_id);
           $upd->execute();
           $upd->close();
 
-          // deduct stock from order_items
           $si = $conn->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
           $si->bind_param("i", $order_id);
           $si->execute();
@@ -54,7 +49,6 @@ if ($order_id && $session_id) {
           $updP->close();
           $si->close();
 
-          // clear user's cart
           if (!empty($user_id)) {
               $del = $conn->prepare("DELETE FROM user_cart WHERE user_id = ?");
               $del->bind_param("i", $user_id);
