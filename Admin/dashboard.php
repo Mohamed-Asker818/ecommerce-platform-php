@@ -1,17 +1,10 @@
 <?php
-
-
-
 require __DIR__ . '/admin_init.php';
 require __DIR__ . '/admin_helpers.php';
-
-
 if (!is_admin()) {
     header("Location: login.php");
     exit;
 }
-
-
 
 $statsSql = "SELECT
     COUNT(*) AS totalOrders,
