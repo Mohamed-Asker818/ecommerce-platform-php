@@ -8,15 +8,12 @@
     <title>⚖️ مقارنة المنتجات</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="../Assets/css/compare.css">
-    <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 </head>
 <body>
-    <!-- Container -->
     <div class="compare-wrapper">
-        <!-- Header -->
         <header class="compare-header">
             <button class="back-btn" onclick="history.back()" aria-label="العودة">
                 ↩️ العودة
@@ -27,9 +24,7 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="compare-main">
-            <!-- Loading State -->
             <div class="loading-section" id="loading-section">
                 <div class="spinner-container">
                     <div class="spinner"></div>
@@ -37,7 +32,6 @@
                 </div>
             </div>
 
-            <!-- Error State -->
             <div class="error-section" id="error-section" style="display: none;">
                 <div class="error-content">
                     <span class="error-icon">⚠️</span>
@@ -47,7 +41,6 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
             <div class="empty-section" id="empty-section" style="display: none;">
                 <div class="empty-content">
                     <span class="empty-icon">⚖️</span>
@@ -60,7 +53,6 @@
                 </div>
             </div>
 
-            <!-- Compare Content -->
             <div class="compare-content" id="compare-content" style="display: none;">
                 <div class="compare-header-actions">
                     <div class="compare-stats">
@@ -76,12 +68,10 @@
 
                 <div class="compare-table-wrapper">
                     <div id="compare-table">
-                        <!-- سيتم تعبئته بواسطة JavaScript -->
                     </div>
                 </div>
 
                 <div class="add-more-section" id="add-more-section" style="display: none;">
-                    <!-- سيتم تعبئته بواسطة JavaScript -->
                 </div>
 
                 <div class="compare-footer-actions">
@@ -98,17 +88,14 @@
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="compare-footer">
             <p>⚖️ قارن بين المنتجات بسهولة واتخذ القرار الأنسب</p>
             <p class="help-text">يمكنك إضافة حتى 2 منتجات للمقارنة في نفس الوقت على الموبايل</p>
         </footer>
     </div>
 
-    <!-- Toast Container for Notifications -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- JavaScript Files -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="../Assets/js/compare.js"></script>
 </body>
