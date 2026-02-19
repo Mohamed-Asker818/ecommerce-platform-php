@@ -1,9 +1,8 @@
-// profile.js - Profile Management System (محسّن ومعالج للأخطاء)
 class ProfileSystem {
     constructor() {
         this.userData = null;
         this.isLoading = false;
-        this.eventsBound = false; // لمنع الربط المزدوج للأحداث
+        this.eventsBound = false; 
         this.cropper = null;
 
         this.selectors = {
@@ -20,7 +19,6 @@ class ProfileSystem {
             totalSpent: '#total-spent',
             memberStatus: '#member-status',
 
-            // Forms
             editProfileForm: '#edit-profile-form',
             editName: '#edit-name',
             editEmail: '#edit-email',
@@ -33,19 +31,16 @@ class ProfileSystem {
             confirmPassword: '#confirm-password',
             changePasswordBtn: '#change-password-btn',
 
-            // Avatar upload + Cropper
             avatarInput: '#avatar-input',
             cropperModal: '#cropper-modal',
             cropperImage: '#cropper-image',
             cropSaveBtn: '#crop-save-btn',
 
-            // Delete modal
             deleteModal: '#delete-modal',
             deletePassword: '#delete-password',
             deletePasswordError: '#delete-password-error',
             confirmDeleteBtn: '#confirm-delete-btn',
 
-            // Toast
             toastContainer: '#toast-container'
         };
 
@@ -57,18 +52,14 @@ class ProfileSystem {
             deleteAccount: '../Api/profile_api.php?action=delete_account'
         };
 
-        // لا ننادي init هنا — المستخدم سيُنشئ الكائن ثم init() يُنفذ تلقائياً في السطر الأخير
     }
 
-    // دالة مساعدة تقرأ response كـ text وتحاول parse كـ JSON
     async fetchJSON(url, options = {}) {
         const res = await fetch(url, options);
         const text = await res.text();
 
-        // إذا بدأ الرد بعلامة < غالباً HTML (خطأ سيرفر مثل PHP error / warning)
         const trimmed = text.trim();
         if (!res.ok) {
-            // حاول parse JSON لو ممكن وإلا أعطِ رسالة مفهومة
             try {
                 const parsed = JSON.parse(trimmed);
                 throw new Error(parsed.msg || `Server returned status ${res.status}`);
@@ -81,7 +72,6 @@ class ProfileSystem {
         try {
             return JSON.parse(trimmed);
         } catch (err) {
-            // لو رجع HTML بدل JSON - أظهر نص HTML في الكونسول لمطوري السيرفر
             if (trimmed.startsWith('<')) {
                 console.error('Expected JSON but got HTML from server:', trimmed);
                 throw new Error('استجابة السيرفر ليست بصيغة JSON — تحقق من مسارات الـ API أو أخطاء PHP.');
@@ -92,7 +82,6 @@ class ProfileSystem {
     }
 
     async init() {
-        // ربط الأحداث مرة واحدة فقط
         this.bindEvents();
         this.initAvatarHandling();
         await this.loadProfileData();
@@ -181,7 +170,6 @@ class ProfileSystem {
     }
 
     initAvatarHandling() {
-        // فقط ربط ما يلزم هنا — لا تضيف upload مباشر إذا تستخدم Cropper
         const avatarElement = document.querySelector(this.selectors.userAvatar);
         const fallbackElement = document.querySelector(this.selectors.avatarFallback);
         const avatarInput = document.querySelector(this.selectors.avatarInput);
@@ -195,9 +183,7 @@ class ProfileSystem {
             };
         }
 
-        // إذا تستخدم واجهة القص (cropper) نعرض المودال عند اختيار ملف
         if (avatarInput) {
-            // تأكد إن الإيفنت مش مضاف مرتين
             if (!avatarInput._profileInputBound) {
                 avatarInput.addEventListener('change', (e) => {
                     const file = e.target.files && e.target.files[0];
@@ -230,7 +216,6 @@ class ProfileSystem {
                 try { this.cropper.destroy(); } catch (err) { /* ignore */ }
             }
 
-            // افترض إن Cropper متاح عالمياً
             this.cropper = new Cropper(cropperImage, {
                 aspectRatio: 1,
                 viewMode: 1,
@@ -364,7 +349,6 @@ class ProfileSystem {
             const formData = new FormData();
             formData.append('avatar', file);
 
-            // نفذ طلب الرفع
             const result = await this.fetchJSON(this.endpoints.uploadAvatar, {
                 method: 'POST',
                 body: formData
@@ -520,11 +504,9 @@ class ProfileSystem {
     }
 
     bindEvents() {
-        // منع الربط أكثر من مرة
         if (this.eventsBound) return;
         this.eventsBound = true;
 
-        // Profile form submit
         const editForm = document.querySelector(this.selectors.editProfileForm);
         if (editForm) {
             editForm.addEventListener('submit', (e) => {
@@ -533,7 +515,6 @@ class ProfileSystem {
             });
         }
 
-        // Password form submit
         const pwdForm = document.querySelector(this.selectors.changePasswordForm);
         if (pwdForm) {
             pwdForm.addEventListener('submit', (e) => {
@@ -542,14 +523,11 @@ class ProfileSystem {
             });
         }
 
-        // لا نربط avatarInput هنا لأننا ربطناه في initAvatarHandling (الذي يستخدم cropper).
-        // Delete account confirm
         const confirmDeleteBtn = document.querySelector(this.selectors.confirmDeleteBtn);
         if (confirmDeleteBtn) {
             confirmDeleteBtn.addEventListener('click', () => this.deleteAccount());
         }
 
-        // Close modal on overlay click (إذا المودال موجود)
         const deleteModal = document.querySelector(this.selectors.deleteModal);
         if (deleteModal) {
             deleteModal.addEventListener('click', (e) => {
@@ -557,7 +535,6 @@ class ProfileSystem {
             });
         }
 
-        // Close modal on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const modal = document.querySelector(this.selectors.deleteModal);
@@ -622,7 +599,6 @@ class ProfileSystem {
 
     showToast(message, type = 'info') {
         const container = document.querySelector(this.selectors.toastContainer) || this.createToastContainer();
-        // تفادي الازدواجية: إذا موجود نفس الرسالة الآن لا تضيفها ثانية
         const existing = Array.from(container.querySelectorAll('.toast-message')).some(el => el.textContent === message);
         if (existing) return;
 
@@ -659,10 +635,8 @@ class ProfileSystem {
     }
 }
 
-// Initialize profile system when DOM is loaded and تأكد من استدعاء init()
 document.addEventListener('DOMContentLoaded', () => {
     window.ProfileSystem = new ProfileSystem();
-    // مهم: ننادي init حتى يبدأ تحميل البيانات وربط الأحداث
     window.ProfileSystem.init().catch(err => {
         console.error('Failed to init ProfileSystem:', err);
     });
