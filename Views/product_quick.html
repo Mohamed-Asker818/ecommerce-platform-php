@@ -1,15 +1,12 @@
-<!-- استدعاء ملف CSS المنفصل -->
 <link rel="stylesheet" href="../Assets/css/product_quick.css">
 
 <div class="quick-view-container">
     
     <div class="quick-view-main">
-        <!-- الصورة على اليمين -->
         <div class="qv-image-section">
             <img src="{$product.image_url}" alt="{$product.name}" onerror="this.src='../Assets/images/default-product.png'">
         </div>
         
-        <!-- التفاصيل على اليسار -->
         <div class="qv-details-section">
             <div class="qv-brand">{$product.brand}</div>
             <h1 class="qv-title">{$product.name}</h1>
@@ -36,7 +33,6 @@
         </div>
     </div>
     
-    <!-- المنتجات المشابهة في الأسفل -->
     {if $related_products}
     <div class="qv-similar-section">
         <div class="qv-similar-title">اشترى العملاء أيضًا</div>
