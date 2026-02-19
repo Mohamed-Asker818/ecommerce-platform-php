@@ -1,5 +1,4 @@
 <?php
-// wishlist_api.php
 session_start();
 require_once __DIR__ . '/../Model/db.php';
 
@@ -85,7 +84,6 @@ class WishlistAPI {
             $stmt->bind_param('ii', $this->userId, $productId);
             
             if ($stmt->execute()) {
-                // الحصول على العدد المتبقي
                 $countQuery = "SELECT COUNT(*) as count FROM user_wishlist WHERE user_id = ?";
                 $countStmt = $this->conn->prepare($countQuery);
                 $countStmt->bind_param('i', $this->userId);
@@ -140,7 +138,6 @@ class WishlistAPI {
     }
 }
 
-// Handle the request
 try {
     $wishlistAPI = new WishlistAPI($conn);
     $response = $wishlistAPI->handleRequest();
