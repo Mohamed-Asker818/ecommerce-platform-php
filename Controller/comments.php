@@ -13,7 +13,6 @@ if ($product_id <= 0 && $action !== 'check_notifications') {
 }
 
 if ($action === 'list') {
-    // جلب التعليقات
     $stmt = $conn->prepare("
         SELECT c.comment, c.rating, c.created_at, u.name, u.avatar 
         FROM product_comments c 
@@ -43,7 +42,6 @@ if ($action === 'list') {
         exit;
     }
 
-    // التحقق من الشراء وحالة الطلب (delivered أو completed)
     $checkPurchase = $conn->prepare("
         SELECT o.id 
         FROM orders o 
@@ -62,7 +60,6 @@ if ($action === 'list') {
     }
     $checkPurchase->close();
 
-    // التحقق مما إذا كان قد علق من قبل
     $checkComment = $conn->prepare("SELECT id FROM product_comments WHERE user_id = ? AND product_id = ? LIMIT 1");
     $checkComment->bind_param("ii", $user_id, $product_id);
     $checkComment->execute();
@@ -94,7 +91,6 @@ if ($action === 'list') {
         exit;
     }
 
-    // التحقق من الأهلية مرة أخرى للأمان
     $checkPurchase = $conn->prepare("
         SELECT o.id 
         FROM orders o 
@@ -111,11 +107,9 @@ if ($action === 'list') {
     }
     $checkPurchase->close();
 
-    // إضافة التعليق والتقييم
     $stmt = $conn->prepare("INSERT INTO product_comments (product_id, user_id, comment, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
     $stmt->bind_param("iisi", $product_id, $user_id, $comment, $rating);
     if ($stmt->execute()) {
-        // تحديث إحصائيات المنتج
         $updateProd = $conn->prepare("
             UPDATE products 
             SET rating = (SELECT AVG(rating) FROM product_comments WHERE product_id = ?),
@@ -138,7 +132,6 @@ if ($action === 'list') {
         exit;
     }
 
-    // جلب المنتجات التي تم استلامها ولم يتم تقييمها بعد
     $query = "
         SELECT p.id, p.name, p.image 
         FROM orders o 
