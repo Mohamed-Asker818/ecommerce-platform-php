@@ -1,26 +1,19 @@
 <?php
-/**
- * load_products.php - AJAX endpoint to load more products using Smarty
- */
 
 session_start();
 
-// إعدادات الأخطاء (يفضل إيقافها في الإنتاج)
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-// استيراد الملفات الأساسية
 require_once __DIR__ . '/../Model/db.php';
 require_once __DIR__ . '/../Smarty/libs/Smarty.class.php';
 
-// تهيئة Smarty
 $smarty = new Smarty();
 $smarty->registerPlugin('modifier', 'urlencode', 'urlencode');
 $smarty->registerPlugin('modifier', 'number_format', 'number_format');
 $smarty->setTemplateDir(__DIR__ . '/../Views/');
 $smarty->setCompileDir(__DIR__ . '/templates_c/');
 
-// دالة مساعدة لإرسال استجابة JSON
 function sendResponse($success, $data = []) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(array_merge(['success' => $success], $data));
@@ -31,7 +24,6 @@ if (!$conn) {
     sendResponse(false, ['msg' => 'فشل الاتصال بقاعدة البيانات']);
 }
 
-// --- جلب بيانات الجلسة (المفضلة والمقارنة) ---
 $wishlist_ids = [];
 if (isset($_SESSION['user_id'])) {
     $uid = intval($_SESSION['user_id']);
@@ -51,7 +43,6 @@ if (isset($_SESSION['user_id'])) {
 
 $compare_ids = isset($_SESSION['compare']) ? array_keys($_SESSION['compare']) : [];
 
-// --- معالجة متغيرات البحث والصفحات ---
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage = isset($_GET['limit']) ? min(100, (int)$_GET['limit']) : 12;
 $start = ($page - 1) * $perPage;
@@ -88,7 +79,6 @@ if (!empty($_GET['sort'])) {
     }
 }
 
-// --- جلب المنتجات ---
 $sql = "SELECT id, name, price, old_price, stock, is_new, image FROM products $whereSQL $orderSQL LIMIT ?, ?";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -104,7 +94,6 @@ $result = $stmt->get_result();
 $productsRaw = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// --- جلب العدد الإجمالي للصفحات ---
 $countSql = "SELECT COUNT(*) as total FROM products $whereSQL";
 $countStmt = $conn->prepare($countSql);
 $total = 0;
@@ -118,7 +107,6 @@ if ($countStmt) {
 $totalPages = ceil($total / $perPage);
 $hasNextPage = $page < $totalPages;
 
-// --- جلب التقييمات وتجهيز البيانات للقالب ---
 $productIds = array_map(fn($p) => (int)$p['id'], $productsRaw);
 $ratings = [];
 if (!empty($productIds)) {
@@ -157,11 +145,9 @@ foreach ($productsRaw as $row) {
     ];
 }
 
-// --- رندرة القالب باستخدام Smarty ---
 $smarty->assign('products', $productPayload);
 $html = $smarty->fetch('load_products.html');
 
-// --- إرجاع النتيجة ---
 sendResponse(true, [
     'html' => $html,
     'hasNextPage' => $hasNextPage,
