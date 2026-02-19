@@ -9,7 +9,6 @@
 </head>
 <body>
     <div class="cart-wrapper">
-        <!-- Header -->
         <header class="cart-header">
             <h1><span class="cart-icon">🛒</span> سلة المشتريات</h1>
             <div class="user-info" id="user-info">
@@ -17,9 +16,7 @@
             </div>
         </header>
 
-        <!-- Main Container -->
         <main class="cart-main-container">
-            <!-- Loading State -->
             <div class="loading-section" id="loading-section">
                 <div class="spinner-container">
                     <div class="spinner"></div>
@@ -27,7 +24,6 @@
                 </div>
             </div>
 
-            <!-- Error State -->
             <div class="error-section" id="error-section" style="display: none;">
                 <div class="error-content">
                     <span class="error-icon">⚠️</span>
@@ -37,7 +33,6 @@
                 </div>
             </div>
 
-            <!-- Empty Cart -->
             <div class="empty-cart-section" id="empty-cart-section" style="display: none;">
                 <div class="empty-cart-content">
                     <span class="empty-icon">🛒</span>
@@ -47,9 +42,7 @@
                 </div>
             </div>
 
-            <!-- Cart Content -->
             <div class="cart-content-section" id="cart-content-section" style="display: none;">
-                <!-- Cart Items -->
                 <section class="cart-items-section" aria-label="عناصر السلة">
                     <div class="cart-items-header">
                         <h2>المنتجات في سلة المشتريات</h2>
@@ -58,7 +51,6 @@
                     <div class="cart-items-container" id="cart-items-container"></div>
                 </section>
 
-                <!-- Cart Summary -->
                 <aside class="cart-summary-section" aria-label="ملخص الطلب">
                     <div class="summary-card">
                         <h3>ملخص الطلب</h3>
@@ -93,7 +85,6 @@
             </div>
         </main>
 
-        <!-- Cart Actions -->
         <footer class="cart-footer" id="cart-footer" style="display: none;">
             <div class="cart-actions">
                 <button class="action-btn clear-all-btn" id="clear-all-btn">
@@ -107,7 +98,6 @@
             </div>
         </footer>
 
-        <!-- Modal for Confirmation -->
         <div class="modal-overlay" id="confirmation-modal" style="display: none;">
             <div class="modal-content">
                 <h3 id="modal-title"></h3>
@@ -119,11 +109,9 @@
             </div>
         </div>
 
-        <!-- Notification Toast -->
         <div class="toast-container" id="toast-container"></div>
     </div>
 
-    <!-- JavaScript Files -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="../Assets/js/cart.js"></script>
 </body>
