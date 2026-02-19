@@ -1,5 +1,4 @@
 <?php
-// order_success_api.php - Order Data Handler
 class OrderSuccess {
     private $conn;
     private $userId;
@@ -13,22 +12,17 @@ class OrderSuccess {
     
     public function getOrderData() {
         try {
-            // Get order details
             $order = $this->getOrderDetails();
             if (!$order) {
                 return null;
             }
             
-            // Get order items
             $items = $this->getOrderItems();
             
-            // Calculate totals
             $totals = $this->calculateTotals($items);
             
-            // Get order status info
             $statusInfo = $this->getStatusInfo($order['status']);
             
-            // Get shipping info
             $shippingInfo = $this->getShippingInfo($order);
             
             return [
@@ -67,7 +61,6 @@ class OrderSuccess {
             return null;
         }
         
-        // Format order data
         return [
             'id' => (int)$order['id'],
             'order_number' => $this->generateOrderNumber($order['id']),
@@ -125,9 +118,8 @@ class OrderSuccess {
             $subtotal += $item['subtotal'];
         }
         
-        // In a real application, you might have shipping, tax, etc.
-        $shipping = 0; // Calculate based on your business logic
-        $tax = 0; // Calculate based on your business logic
+        $shipping = 0;
+        $tax = 0;
         $total = $subtotal + $shipping + $tax;
         
         return [
@@ -198,7 +190,6 @@ class OrderSuccess {
     }
     
     private function getShippingInfo($order) {
-        // This would come from your shipping table or calculation
         return [
             'method' => 'توصيل سريع',
             'estimated_delivery' => $this->calculateDeliveryDate($order['created_at_raw']),
@@ -251,7 +242,6 @@ class OrderSuccess {
         $timestamp = strtotime($date);
         $formatted = date('Y-m-d H:i', $timestamp);
         
-        // Add Arabic month names
         $arabicMonths = [
             'January' => 'يناير',
             'February' => 'فبراير',
