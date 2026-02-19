@@ -1,5 +1,4 @@
 <?php
-// product_api.php
 session_start();
 require_once '../Model/db.php';
 
@@ -35,7 +34,6 @@ class ProductAPI {
         }
         
         try {
-            // Get product data
             $stmt = $this->conn->prepare("SELECT * FROM products WHERE id = ? LIMIT 1");
             $stmt->bind_param('i', $productId);
             $stmt->execute();
@@ -52,7 +50,6 @@ class ProductAPI {
                     'image' => $row['image']
                 ];
 
-                // Get additional images
                 $additional_images = [];
                 $imgStmt = $this->conn->prepare("SELECT image_path FROM product_images WHERE product_id = ? ORDER BY sort_order ASC");
                 $imgStmt->bind_param('i', $productId);
@@ -63,7 +60,6 @@ class ProductAPI {
                 }
                 $product['additional_images'] = $additional_images;
                 
-                // Get similar products
                 $similar_products = $this->getSimilarProducts($row['category_id'], $productId);
                 
                 return $this->successResponse('تم جلب بيانات المنتج', [
@@ -110,7 +106,6 @@ class ProductAPI {
         }
         
         try {
-            // Check product stock
             $stmt = $this->conn->prepare("SELECT stock FROM products WHERE id = ?");
             $stmt->bind_param('i', $productId);
             $stmt->execute();
@@ -125,7 +120,6 @@ class ProductAPI {
             }
             
             if ($this->userId > 0) {
-                // Logged in user - save to database
                 $query = "INSERT INTO user_cart (user_id, product_id, quantity, added_at) 
                          VALUES (?, ?, ?, NOW()) 
                          ON DUPLICATE KEY UPDATE quantity = quantity + ?";
@@ -136,7 +130,6 @@ class ProductAPI {
                     throw new Exception('فشل إضافة المنتج للسلة');
                 }
                 
-                // Get cart count
                 $countQuery = "SELECT COUNT(*) as count FROM user_cart WHERE user_id = ?";
                 $countStmt = $this->conn->prepare($countQuery);
                 $countStmt->bind_param('i', $this->userId);
@@ -144,7 +137,6 @@ class ProductAPI {
                 $countResult = $countStmt->get_result();
                 $cartCount = $countResult->fetch_assoc()['count'];
             } else {
-                // Guest user - save to session
                 if (!isset($_SESSION['cart'])) {
                     $_SESSION['cart'] = [];
                 }
@@ -188,7 +180,6 @@ class ProductAPI {
     }
 }
 
-// Handle the request
 try {
     $productAPI = new ProductAPI($conn);
     $response = $productAPI->handleRequest();
