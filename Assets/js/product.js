@@ -1,4 +1,3 @@
-// product.js - Product Page System (نظام الزوم الدقيق الكامل)
 
 class ProductSystem {
     constructor() {
@@ -8,7 +7,6 @@ class ProductSystem {
         this.isLoading = false;
         this.quantity = 1;
         
-        // Zoom System Properties
         this.zoomLevel = 1.0;
         this.minZoom = 1.0;
         this.maxZoom = 5.0;
@@ -59,14 +57,12 @@ class ProductSystem {
         this.initPrecisionZoom();
     }
     
-    // ====== نظام الزوم الدقيق الكامل ======
     initPrecisionZoom() {
         const mainImage = document.querySelector(this.selectors.productMainImage);
         const imageContainer = document.querySelector('.main-image-container');
         
         if (!mainImage || !imageContainer) return;
         
-        // إعداد العناصر الأساسية
         this.zoomElements = {
             mainImage: mainImage,
             imageContainer: imageContainer,
@@ -77,20 +73,16 @@ class ProductSystem {
             zoomPercent: document.querySelector(this.selectors.zoomPercent)
         };
         
-        // الانتظار حتى تحميل الصورة
         if (mainImage.complete && mainImage.naturalWidth > 0) {
             this.onMainImageLoaded();
         } else {
             mainImage.onload = () => this.onMainImageLoaded();
         }
         
-        // ربط أحداث أزرار الزوم
         this.bindZoomEvents();
         
-        // ربط أحداث الماوس
         this.bindMouseEvents();
         
-        // إعداد الزوم للموبايل
         this.initMobileZoom();
     }
     
@@ -98,7 +90,6 @@ class ProductSystem {
         const { mainImage } = this.zoomElements;
         if (!mainImage) return;
         
-        // تخزين الأبعاد الأصلية للصورة
         this.imageNaturalSize = {
             width: mainImage.naturalWidth,
             height: mainImage.naturalHeight
@@ -106,19 +97,15 @@ class ProductSystem {
         
         this.mainImageLoaded = true;
         
-        // إنشاء نافذة الزوم
         this.createPrecisionZoomWindow();
         
-        // تحديث حالة أزرار الزوم
         this.updateZoomControls();
     }
     
     createPrecisionZoomWindow() {
-        // إزالة أي نافذة زوم موجودة سابقاً
         const existingWindow = document.querySelector('.precision-zoom-window');
         if (existingWindow) existingWindow.remove();
         
-        // إنشاء نافذة الزوم
         const zoomWindow = document.createElement('div');
         zoomWindow.className = 'precision-zoom-window';
         zoomWindow.style.display = 'none';
@@ -157,11 +144,9 @@ class ProductSystem {
         zoomWindow.appendChild(zoomWindowImg);
         document.body.appendChild(zoomWindow);
         
-        // حفظ العناصر
         this.zoomElements.zoomWindow = zoomWindow;
         this.zoomElements.zoomWindowImg = zoomWindowImg;
         
-        // تعيين صورة نافذة الزوم (نفس صورة العرض)
         zoomWindowImg.src = this.zoomElements.mainImage.src;
     }
     
