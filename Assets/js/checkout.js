@@ -1,4 +1,3 @@
-
 class CheckoutSystem {
     constructor() {
         this.cartData = null;
@@ -249,7 +248,6 @@ class CheckoutSystem {
             });
         }
         
-        // إغلاق النوافذ عند النقر خارجها
         document.addEventListener('click', (e) => {
             const creditCardModal = document.getElementById('credit-card-modal');
             if (creditCardModal && e.target === creditCardModal) {
@@ -280,7 +278,6 @@ class CheckoutSystem {
             }
         });
         
-        // إرسال نموذج بطاقة الائتمان
         const cardForm = document.getElementById('credit-card-form');
         if (cardForm) {
             cardForm.addEventListener('submit', (e) => {
@@ -289,7 +286,6 @@ class CheckoutSystem {
             });
         }
         
-        // حذف المنتج من السلة (Event Delegation)
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('remove-item-btn')) {
                 e.preventDefault();
@@ -306,7 +302,6 @@ class CheckoutSystem {
             return;
         }
         
-        // التحقق من النموذج
         if (!this.validateForm()) {
             this.showToast('الرجاء ملء جميع الحقول المطلوبة بشكل صحيح', 'error');
             return;
@@ -315,7 +310,6 @@ class CheckoutSystem {
         const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
         console.log(`💳 طريقة الدفع المختارة: ${paymentMethod}`);
         
-        // التعامل مع طرق الدفع المختلفة
         switch (paymentMethod) {
             case 'wallet':
                 this.showWalletModal();
@@ -331,7 +325,6 @@ class CheckoutSystem {
     validateForm() {
         let isValid = true;
         
-        // التحقق من الاسم
         const nameInput = document.getElementById('customer-name');
         const nameError = document.getElementById('name-error');
         if (!nameInput.value.trim()) {
@@ -342,7 +335,6 @@ class CheckoutSystem {
             nameError.classList.remove('show');
         }
         
-        // التحقق من الهاتف
         const phoneInput = document.getElementById('phone');
         const phoneError = document.getElementById('phone-error');
         const phoneRegex = /^[0-9]{10,15}$/;
@@ -354,7 +346,6 @@ class CheckoutSystem {
             phoneError.classList.remove('show');
         }
         
-        // التحقق من العنوان
         const addressInput = document.getElementById('address');
         const addressError = document.getElementById('address-error');
         if (!addressInput.value.trim()) {
@@ -387,7 +378,6 @@ class CheckoutSystem {
                 formData.append('card_last_four', cardData.card_number ? cardData.card_number.slice(-4) : '');
             }
             
-            // حفظ العنوان في localStorage
             const address = formData.get('address');
             if (address) {
                 try {
@@ -410,10 +400,8 @@ class CheckoutSystem {
             if (result.success) {
                 this.showToast(result.msg || 'تم إنشاء الطلب بنجاح 🎉', 'success');
                 
-                // عرض نافذة النجاح
                 this.showSuccessModal(result);
                 
-                // إعادة التوجيه بعد 5 ثواني
                 setTimeout(() => {
                     if (result.redirect) {
                         window.location.href = result.redirect;
@@ -449,7 +437,6 @@ class CheckoutSystem {
             `${parseFloat(total).toFixed(2)} ج.م`;
         document.querySelector(this.selectors.modalProvider).textContent = providerName;
         
-        // تعبئة الهاتف من بيانات المستخدم
         const modalPhone = document.querySelector(this.selectors.modalPhone);
         if (this.userData && this.userData.phone && modalPhone) {
             modalPhone.value = this.userData.phone;
@@ -508,7 +495,6 @@ class CheckoutSystem {
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         
-        // التركيز على أول حقل
         setTimeout(() => {
             const cardNumberInput = document.getElementById('card-number');
             if (cardNumberInput) {
@@ -540,7 +526,6 @@ class CheckoutSystem {
         this.hideCreditCardModal();
         this.showToast('جاري معالجة الدفع بالبطاقة...', 'info');
 
-        // محاكاة معالجة الدفع
         setTimeout(async () => {
             try {
                 await this.submitOrder('card', null, this.getCreditCardData());
@@ -553,7 +538,6 @@ class CheckoutSystem {
     validateCreditCardForm() {
         let isValid = true;
         
-        // التحقق من رقم البطاقة
         const cardNumber = document.getElementById('card-number')?.value.replace(/\s/g, '') || '';
         const cardNumberError = document.getElementById('card-number-error');
         
@@ -567,7 +551,6 @@ class CheckoutSystem {
             cardNumberError.classList.remove('show');
         }
 
-        // التحقق من تاريخ الانتهاء
         const expiryDate = document.getElementById('card-expiry')?.value || '';
         const expiryError = document.getElementById('card-expiry-error');
         
@@ -581,7 +564,6 @@ class CheckoutSystem {
             expiryError.classList.remove('show');
         }
 
-        // التحقق من CVV
         const cvv = document.getElementById('card-cvv')?.value || '';
         const cvvError = document.getElementById('card-cvv-error');
         
@@ -595,7 +577,6 @@ class CheckoutSystem {
             cvvError.classList.remove('show');
         }
 
-        // التحقق من اسم حامل البطاقة
         const cardholderName = document.getElementById('cardholder-name')?.value.trim() || '';
         const nameError = document.getElementById('cardholder-name-error');
         
@@ -713,25 +694,20 @@ class CheckoutSystem {
         const cardTypeIcon = document.getElementById('card-type-icon');
         if (!cardTypeIcon) return;
         
-        // إعادة تعيين الأنماط
         cardTypeIcon.className = 'card-icon';
         
-        // فيزا
         if (/^4/.test(cardNumber)) {
             cardTypeIcon.classList.add('card-type-visa');
             cardTypeIcon.title = 'Visa';
         }
-        // ماستركارد
         else if (/^5[1-5]/.test(cardNumber)) {
             cardTypeIcon.classList.add('card-type-mastercard');
             cardTypeIcon.title = 'MasterCard';
         }
-        // أمريكان إكسبريس
         else if (/^3[47]/.test(cardNumber)) {
             cardTypeIcon.classList.add('card-type-amex');
             cardTypeIcon.title = 'American Express';
         }
-        // نوع آخر
         else if (cardNumber.length > 0) {
             cardTypeIcon.title = 'بطاقة ائتمان';
         }
@@ -760,7 +736,6 @@ class CheckoutSystem {
         
         if (!modal || !orderDetails) return;
         
-        // تعبئة تفاصيل الطلب
         orderDetails.innerHTML = `
             <div class="order-detail-row">
                 <span>رقم الطلب:</span>
@@ -780,7 +755,6 @@ class CheckoutSystem {
             </div>
         `;
         
-        // إعداد زر عرض الطلب
         const viewOrderBtn = document.getElementById('view-order-btn');
         if (viewOrderBtn && result.order_id) {
             viewOrderBtn.onclick = () => {
@@ -853,7 +827,6 @@ class CheckoutSystem {
         
         container.appendChild(toast);
         
-        // إزالة الـ toast بعد 5 ثواني
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateX(100%)';
@@ -887,10 +860,7 @@ class CheckoutSystem {
         this.loadCheckoutData();
     }
     
-    /* ========== حذف المنتج من السلة ========== */
-    
     confirmRemoveItem(productId) {
-        // إنشاء نافذة تأكيد
         const confirmationDialog = document.createElement('div');
         confirmationDialog.className = 'confirmation-dialog';
         confirmationDialog.innerHTML = `
@@ -912,7 +882,6 @@ class CheckoutSystem {
     }
     
     async removeItem(productId) {
-        // إخفاء نافذة التأكيد
         const confirmationDialog = document.querySelector('.confirmation-dialog');
         if (confirmationDialog) {
             confirmationDialog.remove();
@@ -933,7 +902,6 @@ class CheckoutSystem {
             
             if (result.success) {
                 this.showToast('تم حذف المنتج من السلة', 'success');
-                // إعادة تحميل بيانات السلة
                 await this.loadCheckoutData();
             } else {
                 this.showToast(result.msg || 'فشل في حذف المنتج', 'error');
@@ -952,7 +920,6 @@ class CheckoutSystem {
     }
 }
 
-// تعريف الدوال العامة
 window.CheckoutUI = {
     formatCardNumber: function(input) {
         window.CheckoutSystem?.formatCardNumber(input);
@@ -983,7 +950,6 @@ window.CheckoutUI = {
     }
 };
 
-// تهيئة النظام عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 تحميل صفحة الدفع...');
     
