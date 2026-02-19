@@ -1,11 +1,9 @@
 <?php
-// checkout_api.php
 session_start();
 require_once '../Model/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Configuration
 $config = include '../Model/config.php';
 
 class CheckoutAPI {
@@ -40,7 +38,6 @@ class CheckoutAPI {
         }
     }
     
-    /* ========== دالة حذف المنتج من السلة ========== */
     private function removeFromCart() {
         if (!isset($_POST['product_id']) || !is_numeric($_POST['product_id'])) {
             return $this->errorResponse('معرف المنتج غير صالح');
@@ -50,7 +47,6 @@ class CheckoutAPI {
         
         try {
             if ($this->isGuest) {
-                // حذف من الجلسة للزوار
                 if (isset($_SESSION['cart'][$productId])) {
                     unset($_SESSION['cart'][$productId]);
                     return $this->successResponse('تم حذف المنتج من السلة');
@@ -58,7 +54,6 @@ class CheckoutAPI {
                     return $this->errorResponse('المنتج غير موجود في السلة');
                 }
             } else {
-                // حذف من قاعدة البيانات للمستخدمين المسجلين
                 $query = "DELETE FROM user_cart WHERE user_id = ? AND product_id = ?";
                 $stmt = $this->conn->prepare($query);
                 $stmt->bind_param('ii', $this->userId, $productId);
@@ -80,13 +75,10 @@ class CheckoutAPI {
     
     private function getCheckoutData() {
         try {
-            // Get user data
             $userData = $this->getUserData();
             
-            // Get cart data
             $cartData = $this->getCartData();
             
-            // Check if this is a direct checkout
             $isDirect = isset($_SESSION['direct_checkout']) && $_SESSION['direct_checkout'];
             
             return [
@@ -102,7 +94,6 @@ class CheckoutAPI {
     
     private function getUserData() {
         if ($this->isGuest) {
-            // Get guest data from session if exists
             return [
                 'name' => isset($_SESSION['guest_name']) ? $_SESSION['guest_name'] : '',
                 'email' => isset($_SESSION['guest_email']) ? $_SESSION['guest_email'] : '',
@@ -137,7 +128,6 @@ class CheckoutAPI {
         $itemCount = 0;
         
         if ($this->isGuest) {
-            // Get from session
             if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
                 return [
                     'items' => [], 
@@ -149,7 +139,6 @@ class CheckoutAPI {
             
             $productIds = array_keys($_SESSION['cart']);
             
-            // Handle empty cart
             if (empty($productIds)) {
                 return [
                     'items' => [], 
@@ -191,7 +180,6 @@ class CheckoutAPI {
                 $itemCount += $quantity;
             }
         } else {
-            // Get from database
             $query = "SELECT c.product_id, c.quantity, p.name, p.price, p.image
                       FROM user_cart c
                       JOIN products p ON c.product_id = p.id
@@ -219,7 +207,6 @@ class CheckoutAPI {
             }
         }
         
-        // Calculate shipping
         $shipping = $this->calculateShipping($totalPrice);
         
         return [
@@ -232,17 +219,14 @@ class CheckoutAPI {
     }
     
     private function calculateShipping($total) {
-        // Free shipping for orders over 500
         if ($total >= 500) {
             return 0;
         }
         
-        // Standard shipping rate
         return 50;
     }
     
     private function processOrder() {
-        // Validate required fields
         $required = ['customer_name', 'phone', 'address', 'payment_method'];
         foreach ($required as $field) {
             if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
@@ -257,86 +241,69 @@ class CheckoutAPI {
         $email = isset($_POST['email']) ? trim($_POST['email']) : '';
         $notes = isset($_POST['notes']) ? trim($_POST['notes']) : '';
         
-        // Validate phone number
         if (!preg_match('/^[0-9]{10,15}$/', $phone)) {
             return $this->errorResponse('رقم الهاتف غير صالح (يجب أن يكون 10-15 رقم)');
         }
         
-        // Validate email if provided
         if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->errorResponse('البريد الإلكتروني غير صالح');
         }
         
-        // Start transaction
         $this->conn->begin_transaction();
         
         try {
-            // Validate cart before processing
             $cartValidation = $this->validateCart();
             if (!$cartValidation['success']) {
                 throw new Exception($cartValidation['msg']);
             }
             
-            // Get cart items with stock check
             $cartItems = $this->getCartItemsWithStock();
             if (empty($cartItems)) {
                 throw new Exception('سلة المشتريات فارغة');
             }
             
-            // Calculate total
             $total = 0;
             foreach ($cartItems as $item) {
                 $total += $item['price'] * $item['quantity'];
             }
             
-            // Calculate shipping
             $shipping = $this->calculateShipping($total);
             $grandTotal = $total + $shipping;
             
-            // Create order
             $orderId = $this->createOrder($customerName, $phone, $email, $address, 
                                          $total, $shipping, $grandTotal, 
                                          $paymentMethod, $notes);
             
-            // Add order items
             $this->addOrderItems($orderId, $cartItems);
             
-            // Process payment based on method
             $paymentResult = $this->processPayment($orderId, $grandTotal, $paymentMethod, $phone);
             
             if (!$paymentResult['success']) {
                 throw new Exception($paymentResult['message']);
             }
             
-            // Reduce stock
             $this->reduceStock($cartItems);
             
-            // Clear cart
             $this->clearCart();
             
-            // Clear direct checkout session if exists
             if (isset($_SESSION['direct_checkout'])) {
                 unset($_SESSION['direct_checkout']);
             }
             
-            // Store guest info in session for future
             if ($this->isGuest) {
                 $_SESSION['guest_name'] = $customerName;
                 $_SESSION['guest_email'] = $email;
                 $_SESSION['guest_phone'] = $phone;
             }
             
-            // Commit transaction
             $this->conn->commit();
             
-            // Prepare response
             $response = $this->successResponse(
                 'تم إنشاء الطلب بنجاح. رقم الطلب: #' . $orderId,
                 $orderId,
                 $paymentResult['redirect'] ?? null
             );
             
-            // Add order summary
             $response['order_summary'] = [
                 'order_id' => $orderId,
                 'total' => $grandTotal,
@@ -371,16 +338,13 @@ class CheckoutAPI {
     }
     
     private function processCardPayment($orderId, $amount) {
-        // Update order status
         $query = "UPDATE orders SET payment_status = 'completed', status = 'processing' WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $orderId);
         $stmt->execute();
         
-        // Generate payment reference
         $paymentRef = 'CARD-' . time() . '-' . $orderId;
         
-        // Store payment transaction
         $query = "INSERT INTO payment_transactions (order_id, transaction_id, amount, status, created_at) 
                   VALUES (?, ?, ?, 'completed', NOW())";
         $stmt = $this->conn->prepare($query);
@@ -401,7 +365,6 @@ class CheckoutAPI {
         $stmt->bind_param('i', $orderId);
         $stmt->execute();
         
-        // Generate PayPal payment URL
         $paypalUrl = 'https://www.paypal.com/cgi-bin/webscr?';
         $params = http_build_query([
             'cmd' => '_xclick',
@@ -421,7 +384,6 @@ class CheckoutAPI {
     }
     
     private function processWalletPayment($orderId, $amount, $provider, $walletPhone) {
-        // Update order with wallet info
         $query = "UPDATE orders SET 
                   payment_status = 'pending',
                   wallet_provider = ?,
@@ -432,7 +394,6 @@ class CheckoutAPI {
         $stmt->bind_param('ssi', $provider, $walletPhone, $orderId);
         $stmt->execute();
         
-        // Generate payment reference
         $paymentRef = 'WALLET-' . time() . '-' . $orderId;
         
         return [
@@ -604,7 +565,6 @@ class CheckoutAPI {
     }
     
     private function processDirectOrder() {
-        // Handle direct buy from product page
         $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
         $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
         
@@ -613,7 +573,6 @@ class CheckoutAPI {
         }
         
         try {
-            // Verify product exists and has stock
             $product = $this->getProductWithStock($productId);
             
             if (!$product) {
@@ -624,7 +583,6 @@ class CheckoutAPI {
                 return $this->errorResponse('الكمية غير متوفرة في المخزون');
             }
             
-            // For direct checkout, we'll store the product in a special session
             $_SESSION['direct_checkout'] = [
                 'product_id' => $productId,
                 'quantity' => $quantity,
@@ -633,10 +591,8 @@ class CheckoutAPI {
                 'timestamp' => time()
             ];
             
-            // Clear existing cart for direct checkout
             $this->clearCart();
             
-            // Add the product to cart
             if ($this->isGuest) {
                 $_SESSION['cart'][$productId] = $quantity;
             } else {
@@ -685,7 +641,6 @@ class CheckoutAPI {
                 return $this->errorResponse('سلة المشتريات فارغة');
             }
             
-            // Check stock for all items
             foreach ($cartItems as $item) {
                 $product = $this->getProductWithStock($item['id']);
                 
@@ -730,7 +685,6 @@ class CheckoutAPI {
     }
 }
 
-// Handle the request
 try {
     $checkoutAPI = new CheckoutAPI($conn, $config);
     $response = $checkoutAPI->handleRequest();
