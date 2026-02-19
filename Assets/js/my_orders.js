@@ -1,4 +1,3 @@
-// my_orders.js (مصحح بالكامل)
 
 class MyOrders {
     constructor() {
@@ -48,7 +47,6 @@ class MyOrders {
         this.init();
     }
 
-    // --- Helpers for safe DOM access ---
     q(selector) {
         try {
             return document.querySelector(selector);
@@ -100,7 +98,6 @@ class MyOrders {
         }
     }
 
-    // Build API URL relative to current page directory
     getApiUrl(endpoint) {
         const ep = (endpoint || '').replace(/^\/+/, '');
         const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
@@ -226,7 +223,6 @@ class MyOrders {
         const ordersHTML = orders.map(order => this.createOrderCard(order)).join('');
         ordersList.innerHTML = ordersHTML;
         
-        // Bind buttons/events on the newly created DOM
         this.bindOrderCardEvents();
     }
     
@@ -311,14 +307,12 @@ class MyOrders {
         const currentPage = pagination.page || 1;
         const totalPages = pagination.pages || 1;
         
-        // Previous button
         paginationHTML += `
             <button class="pagination-btn prev-btn" ${currentPage <= 1 ? 'disabled' : ''} data-page="${currentPage - 1}">
                 <i class="fas fa-chevron-right"></i> السابق
             </button>
         `;
         
-        // Page numbers
         const maxVisible = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
         let endPage = Math.min(totalPages, startPage + maxVisible - 1);
@@ -339,19 +333,16 @@ class MyOrders {
             paginationHTML += `${endPage < totalPages - 1 ? '<span class="pagination-dots">...</span>' : ''}<button class="pagination-btn" data-page="${totalPages}">${totalPages}</button>`;
         }
         
-        // Next button
         paginationHTML += `
             <button class="pagination-btn next-btn" ${currentPage >= totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">
                 التالي <i class="fas fa-chevron-left"></i>
             </button>
         `;
         
-        // Page info
         paginationHTML += `<span class="pagination-info">صفحة ${currentPage} من ${totalPages}</span>`;
         
         paginationContainer.innerHTML = paginationHTML;
 
-        // delegate clicks
         paginationContainer.querySelectorAll('.pagination-btn:not([disabled])').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const page = parseInt(btn.getAttribute('data-page')) || 1;
@@ -397,7 +388,6 @@ class MyOrders {
                 }
             });
 
-            // HTTP status not OK
             if (!response.ok) {
                 const text = await response.text().catch(() => '');
                 console.error('Order details fetch failed. HTTP', response.status, text);
@@ -453,7 +443,6 @@ class MyOrders {
         modalBody.innerHTML = content;
         modal.style.display = 'flex';
         
-        // Prevent body scroll when modal is open
         document.body.style.overflow = 'hidden';
         
         this.bindModalEvents();
@@ -638,7 +627,6 @@ class MyOrders {
             
             if (data.success) {
                 this.showNotification(data.message || 'تمت إضافة المنتجات إلى السلة', 'success');
-                // Update cart count if function exists
                 if (typeof updateCartCount === 'function') {
                     updateCartCount(data.added_count);
                 }
@@ -673,7 +661,6 @@ class MyOrders {
     }
     
     bindEvents() {
-        // Filter buttons
         const applyBtn = this.id('apply-filters-btn');
         const resetBtn = this.id('reset-filters-btn');
         const confirmCancelBtn = this.id('confirm-cancel-btn');
@@ -684,7 +671,6 @@ class MyOrders {
         if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', () => this.cancelOrder());
         if (cancelCancelBtn) cancelCancelBtn.addEventListener('click', () => this.closeCancelModal());
         
-        // Close modals when clicking outside
         document.addEventListener('click', (e) => {
             const orderModal = this.q(this.selectors.orderDetailsModal);
             const cancelModal = this.q(this.selectors.cancelOrderModal);
@@ -697,7 +683,6 @@ class MyOrders {
             }
         });
         
-        // Escape key to close modals
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.closeOrderModal();
@@ -705,7 +690,6 @@ class MyOrders {
             }
         });
         
-        // Retry button
         const retryBtn = this.q('#retry-btn');
         if (retryBtn) {
             retryBtn.addEventListener('click', this.retryLoading);
@@ -762,7 +746,6 @@ class MyOrders {
     }
     
     setupAutoRefresh() {
-        // Refresh orders every 60 seconds if page is visible
         setInterval(() => {
             if (document.visibilityState === 'visible' && !this.isLoading) {
                 this.loadOrders(this.currentPage);
@@ -809,7 +792,6 @@ class MyOrders {
     }
     
     showNotification(message, type = 'info') {
-        // Remove existing notifications
         document.querySelectorAll('.notification').forEach(el => el.remove());
         
         const notification = document.createElement('div');
@@ -874,13 +856,10 @@ class MyOrders {
     }
 }
 
-// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Update copyright year
     const yearEl = document.getElementById('current-year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
     
-    // Add CSS animations for notifications
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideInRight {
@@ -922,7 +901,6 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
     
-    // Initialize MyOrders
     console.log('DOM loaded, initializing MyOrders...');
     window.MyOrders = new MyOrders();
 });
