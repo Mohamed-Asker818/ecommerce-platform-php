@@ -1,17 +1,13 @@
 <?php
-// wishlist_action.php - API للتحكم في قائمة الرغبات
 session_start();
 
-// تعطيل عرض الأخطاء مباشرة في المخرجات لمنع إفساد تنسيق JSON
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-// تصحيح المسار للوصول لملف db.php الموجود في مجلد Model
 require_once __DIR__ . '/../Model/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// دالة مساعدة لإرسال استجابة JSON والخروج
 function sendResponse($success, $msg, $status = '', $count = 0) {
     echo json_encode([
         'success' => $success, 
@@ -30,7 +26,6 @@ if ($product_id <= 0) {
     sendResponse(false, '❌ معرف المنتج غير صالح');
 }
 
-// إذا كان المستخدم غير مسجل، نستخدم الجلسة (Session)
 if ($user_id <= 0) {
     if (!isset($_SESSION['wishlist'])) {
         $_SESSION['wishlist'] = [];
@@ -51,9 +46,7 @@ if ($user_id <= 0) {
     sendResponse(true, '', $exists ? 'exists' : 'not_exists', count($_SESSION['wishlist']));
 }
 
-// إذا كان المستخدم مسجلاً، نستخدم قاعدة البيانات
 try {
-    // تحقق وجود السطر في wishlist
     $exists = false;
     $stmt = $conn->prepare("SELECT id FROM user_wishlist WHERE user_id=? AND product_id=?");
     if ($stmt) {
@@ -74,7 +67,6 @@ try {
                 $d->execute();
                 $d->close();
                 
-                // جلب العداد الجديد
                 $c = $conn->prepare("SELECT COUNT(*) FROM user_wishlist WHERE user_id=?");
                 $c->bind_param('i', $user_id);
                 $c->execute();
@@ -91,7 +83,6 @@ try {
                 $i->execute();
                 $i->close();
                 
-                // جلب العداد الجديد
                 $c = $conn->prepare("SELECT COUNT(*) FROM user_wishlist WHERE user_id=?");
                 $c->bind_param('i', $user_id);
                 $c->execute();
@@ -104,7 +95,6 @@ try {
         }
     }
 
-    // جلب العداد الحالي
     $c = $conn->prepare("SELECT COUNT(*) FROM user_wishlist WHERE user_id=?");
     $c->bind_param('i', $user_id);
     $c->execute();
