@@ -1,16 +1,13 @@
 <?php
-// register_api.php - Adjusted: no username column required
 session_start();
 require_once '../Model/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// CORS (if needed)
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -113,29 +110,22 @@ class RegisterAPI {
                 break;
 
             default:
-                // For fields not explicitly validated, return valid=true
                 break;
         }
 
         return $response;
     }
 
-    /**
-     * isUnique - robust prepared statement that does not rely on get_result()
-     * returns true if value does NOT exist (i.e. unique), false if exists or on DB error returns false (safer)
-     */
     private function isUnique($field, $value) {
         if (!$this->conn) {
-            // if no DB connection we return false to prevent duplicates in DB insertion (safer)
             error_log("isUnique: no DB connection");
             return false;
         }
 
-        // whitelist allowed field names to avoid SQL injection via column name
-        $allowed = ['name', 'email']; // removed 'username' because DB doesn't have it
+        $allowed = ['name', 'email'];
         if (!in_array($field, $allowed)) {
             error_log("isUnique: invalid field requested: $field");
-            return false; // treat as not unique (so create flow will fail safely)
+            return false;
         }
 
         try {
@@ -149,19 +139,17 @@ class RegisterAPI {
             $stmt->bind_param('s', $value);
             $stmt->execute();
 
-            // robust way: store_result and check num_rows
             $stmt->store_result();
             $exists = $stmt->num_rows > 0;
 
             $stmt->close();
-            return !$exists; // true if unique
+            return !$exists;
         } catch (Throwable $t) {
             error_log("Database error in isUnique: " . $t->getMessage());
             return false;
         }
     }
 
-    /* suggestion helpers (unchanged besides using getInput) */
     private function generateNameSuggestions($baseName) {
         $suggestions = [];
         $cleanName = trim($baseName);
@@ -269,7 +257,6 @@ class RegisterAPI {
             return $this->errorResponse('Invalid input');
         }
 
-        // required fields
         $required = ['name', 'email', 'password', 'confirm_password'];
         foreach ($required as $field) {
             if (!isset($input[$field]) || trim($input[$field]) === '') {
@@ -283,7 +270,6 @@ class RegisterAPI {
         $confirmPassword = $input['confirm_password'];
         $phone = isset($input['phone']) ? trim($input['phone']) : '';
 
-        // validations
         if (strlen($name) < 2) return $this->errorResponse('Name must be at least 2 characters');
         if (!preg_match('/^[\p{L}\p{N}\s\-\']+$/u', $name)) return $this->errorResponse('Name can only contain letters, numbers, spaces, apostrophes, and hyphens');
         if (!$this->isUnique('name', $name)) return $this->errorResponse('This name is already taken');
@@ -293,11 +279,9 @@ class RegisterAPI {
         if (!preg_match('/[a-zA-Z]/', $password)) return $this->errorResponse('Password must contain at least one letter');
         if ($password !== $confirmPassword) return $this->errorResponse('Passwords do not match');
 
-        // Insert user
         try {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            // NOTE: No username column — insert only the columns that exist
             $query = "INSERT INTO users (name, email, password, phone, created_at) VALUES (?, ?, ?, ?, NOW())";
             $stmt = $this->conn->prepare($query);
             if (!$stmt) {
@@ -316,7 +300,6 @@ class RegisterAPI {
             $userId = $stmt->insert_id;
             $stmt->close();
 
-            // set session
             $_SESSION['user_id'] = $userId;
             $_SESSION['user_name'] = $name;
             $_SESSION['user_email'] = $email;
@@ -349,7 +332,6 @@ class RegisterAPI {
     }
 }
 
-// handle
 try {
     if (!isset($conn) || !$conn) {
         throw new Exception("Database connection failed");
