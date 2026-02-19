@@ -1,32 +1,25 @@
 <?php
-// cart.php - المتحكم في صفحة سلة المشتريات
 session_start();
 
-// إعداد عرض الأخطاء للتطوير
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// تصحيح المسارات للوصول للملفات المطلوبة
 require_once __DIR__ . '/../Model/db.php';
 require_once __DIR__ . '/../Smarty/libs/Smarty.class.php';
 
-// إعداد Smarty
 $smarty = new Smarty();
 $smarty->setTemplateDir(__DIR__ . '/../Views/');
 $smarty->setCompileDir(__DIR__ . '/../Templates_c/');
 $smarty->setCacheDir(__DIR__ . '/../Cache/');
 
-// جلب بيانات المستخدم إذا كان مسجلاً
 $user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
 $logged_in = ($user_id > 0);
 
-// جلب عدادات السلة والمفضلة والمقارنة
 $cartCount = 0;
 $wishlistCount = 0;
 $compareCount = isset($_SESSION['compare']) ? count($_SESSION['compare']) : 0;
 
 if ($logged_in) {
-    // عداد السلة
     $cStmt = $conn->prepare("SELECT SUM(quantity) as total FROM user_cart WHERE user_id = ?");
     $cStmt->bind_param("i", $user_id);
     $cStmt->execute();
@@ -34,7 +27,6 @@ if ($logged_in) {
     $cartCount = (int)($cRes['total'] ?? 0);
     $cStmt->close();
 
-    // عداد المفضلة
     $wStmt = $conn->prepare("SELECT COUNT(*) as total FROM user_wishlist WHERE user_id = ?");
     $wStmt->bind_param("i", $user_id);
     $wStmt->execute();
@@ -46,7 +38,6 @@ if ($logged_in) {
     $wishlistCount = isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0;
 }
 
-// تمرير البيانات للقالب
 $smarty->assign('logged_in', $logged_in);
 $smarty->assign('counts', [
     'cart' => $cartCount,
@@ -54,6 +45,5 @@ $smarty->assign('counts', [
     'compare' => $compareCount
 ]);
 
-// عرض القالب
 $smarty->display('cart.html');
 ?>
