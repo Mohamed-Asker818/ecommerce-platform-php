@@ -1,6 +1,3 @@
-/**
- * products_load.js - Handle AJAX product loading and interactions
- */
 
 const ProductLoader = {
     currentPage: 1,
@@ -14,7 +11,6 @@ const ProductLoader = {
             loadMoreBtn.addEventListener('click', () => this.loadMore());
         }
 
-        // تهيئة أحداث الأزرار داخل الكروت (سلة، مفضلة، عرض سريع)
         this.bindEvents();
     },
 
@@ -49,18 +45,15 @@ const ProductLoader = {
                 if (btn && btn.style.display !== 'none') {
                     btn.innerHTML = 'تحميل المزيد';
                 }
-                this.bindEvents(); // إعادة ربط الأحداث للعناصر الجديدة
+                this.bindEvents(); 
             });
     },
 
     bindEvents: function() {
-        // هنا يمكن إضافة منطق إضافة للسلة أو المفضلة عبر AJAX
-        // مثال مبسط:
         document.querySelectorAll('.btn-action-v2.add-cart').forEach(btn => {
             btn.onclick = function() {
                 const id = this.getAttribute('data-id');
                 console.log('Adding product to cart:', id);
-                // استدعاء API السلة هنا
             };
         });
 
@@ -69,7 +62,6 @@ const ProductLoader = {
                 const id = this.getAttribute('data-id');
                 this.classList.toggle('active');
                 console.log('Toggling wishlist for product:', id);
-                // استدعاء API المفضلة هنا
             };
         });
     }
