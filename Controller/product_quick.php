@@ -1,8 +1,6 @@
 <?php
-// product_quick.php (النسخة المحسنة والمطورة باستخدام Smarty)
 session_start();
 
-// تصحيح المسار للوصول لملف db.php الموجود في مجلد Model
 require_once __DIR__ . '/../Model/db.php';
 require_once __DIR__ . '/../Smarty/libs/Smarty.class.php';
 
@@ -19,7 +17,6 @@ $smarty->setTemplateDir(__DIR__ . '/templates/');
 $smarty->setCompileDir(__DIR__ . '/templates_c/');
 
 try {
-    // جلب بيانات المنتج الرئيسي مع التقييم الحقيقي من جدول product_ratings
     $sql = "SELECT p.*, c.name as category_name, 
             (SELECT AVG(rating) FROM product_ratings WHERE product_id = p.id) as avg_rating,
             (SELECT COUNT(*) FROM product_ratings WHERE product_id = p.id) as review_count
@@ -39,7 +36,6 @@ try {
     $row = $res->fetch_assoc();
     $stmt->close();
     
-    // جلب منتجات مشابهة
     $relStmt = $conn->prepare("SELECT id, name, price, image FROM products 
                                WHERE category_id = ? AND id <> ? 
                                AND stock > 0 
@@ -49,7 +45,6 @@ try {
     $rels = $relStmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $relStmt->close();
     
-    // تجهيز بيانات المنتج للقالب
     $product_data = [
         'id' => $row['id'],
         'name' => htmlspecialchars($row['name']),
@@ -61,11 +56,9 @@ try {
         'review_count' => $row['review_count'] ?? 0
     ];
 
-    // تمرير البيانات لـ Smarty
     $smarty->assign('product', $product_data);
     $smarty->assign('related_products', $rels);
 
-    // عرض القالب
     $smarty->display('../Views/product_quick.html');
 
 } catch (Exception $e) {
