@@ -1,9 +1,4 @@
-/* Home.css - Luxury Store Design (Enhanced with Sliding Categories & Foldable Filters) */
-/* Fonts imported via HTML for better performance */
-
-/* ===== ROOT VARIABLES ===== */
 :root {
-    /* Color Palette - Luxury Gold Theme */
     --primary: #C5A059;
     --primary-dark: #A98344;
     --primary-light: #E8D9B5;
@@ -27,7 +22,6 @@
     --accent: #8B7355;
     --accent-light: #B8A287;
     
-    /* Dark Mode Colors - Luxury Deep Blue/Black */
     --dark-bg: #0f172a;
     --dark-card: #1e293b;
     --dark-text: #f8fafc;
@@ -35,12 +29,10 @@
     --dark-border: #334155;
     --dark-hover: #334155;
     
-    /* Glass Effects */
     --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-dark: rgba(30, 30, 30, 0.95);
     --glass-border: rgba(255, 255, 255, 0.2);
     
-    /* Shadows & Effects */
     --shadow-xs: 0 1px 3px rgba(0,0,0,0.05);
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
@@ -50,7 +42,6 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     
-    /* Layout */
     --header-height: 70px;
     --container-width: 1400px;
     --radius: 8px;
@@ -65,7 +56,6 @@
     --gap-xl: 50px;
 }
 
-/* ===== DARK MODE ===== */
 body.dark-mode {
     --bg-main: var(--dark-bg);
     --bg-alt: var(--dark-card);
@@ -80,7 +70,6 @@ body.dark-mode {
     color: var(--dark-text);
 }
 
-/* ===== GLOBAL RESET ===== */
 * {
     margin: 0;
     padding: 0;
@@ -364,7 +353,7 @@ body.dark-mode header {
     align-items: center;
     justify-content: space-between;
     height: 100%;
-    gap: var(--gap-xl); /* زيادة المسافة بين العناصر في الكمبيوتر */
+    gap: var(--gap-xl); 
 }
 
 .header-top-row {
@@ -461,11 +450,10 @@ body.dark-mode .logo {
     100% { left: 150%; }
 }
 
-/* ===== SEARCH BAR ===== */
 .search-wrapper {
     position: relative;
     flex: 1;
-    max-width: 700px; /* زيادة العرض للكمبيوتر */
+    max-width: 700px; 
     margin: 0 var(--gap-md);
     transition: var(--transition);
 }
@@ -7040,13 +7028,11 @@ body.dark-mode #compare-bar {
     transform: rotate(15deg);
 }
 
-/* ===== Hero Section Enhancements ===== */
 
 .char {
     position: relative;
 }
 
-/* تم دمج خصائص .reflection في القسم الموحد بالأعلى */
 
 .golden-underline {
     position: absolute;
@@ -7074,7 +7060,6 @@ body.dark-mode #compare-bar {
     transition: all 0.3s ease;
 }
 
-/* تفعيل الوميض عند إضافة كلاس active-neon */
 .neon-board.active-neon {
     border: 3px solid #fff !important;
     border-radius: 24px !important;
@@ -7086,7 +7071,6 @@ body.dark-mode #compare-bar {
     animation: neon-breathing 4s ease-in-out infinite !important;
 }
 
-/* تعريف حركة الوميض الانسيابي (التنفس) */
 @keyframes neon-breathing {
     0%, 100% {
         border-color: #fff;
@@ -7108,11 +7092,6 @@ body.dark-mode #compare-bar {
     }
 }
 
-/* ============================================================
-   BROKEN BULB EFFECT FOR CHARACTERS (اللمبة المحروقة)
-   ============================================================ */
-
-/* حركة اللمبة المحروقة - وميض متقطع للحروف */
 @keyframes broken-bulb-flicker {
     0%, 10%, 15%, 20%, 25%, 30%, 35%, 40%, 45%, 50%, 55%, 60%, 65%, 70%, 75%, 80%, 85%, 90%, 100% {
         opacity: 1;
@@ -7126,14 +7105,12 @@ body.dark-mode #compare-bar {
     }
 }
 
-/* تطبيق تأثير ذهبي ثابت بدلاً من الوميض لسرعة الأداء */
 .char.broken-bulb {
     background: linear-gradient(135deg, #FFD700 0%, #FFF8DC 50%, #FFD700 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
 }
 
-/* تأخير عشوائي لكل حرف لتأثير واقعي */
 .char.broken-bulb:nth-child(1) { animation-delay: 0s; }
 .char.broken-bulb:nth-child(2) { animation-delay: 0.3s; }
 .char.broken-bulb:nth-child(3) { animation-delay: 0.6s; }
@@ -7141,7 +7118,6 @@ body.dark-mode #compare-bar {
 .char.broken-bulb:nth-child(5) { animation-delay: 0.5s; }
 .char.broken-bulb:nth-child(6) { animation-delay: 0.1s; }
 
-/* الانعكاس للحروف في مرحلة اللمبة المحروقة */
 .char.broken-bulb .reflection {
     animation: broken-bulb-flicker 2.5s infinite;
     background: linear-gradient(135deg, #FFD700 0%, #FFF8DC 50%, #FFD700 100%) !important;
@@ -7156,17 +7132,14 @@ body.dark-mode #compare-bar {
 .char.broken-bulb:nth-child(5) .reflection { animation-delay: 0.5s; }
 .char.broken-bulb:nth-child(6) .reflection { animation-delay: 0.1s; }
 
-/* تم إزالة حركات Wobble و Flicker لزيادة سرعة الصفحة */
 .char.broken-bulb {
     animation: none;
 }
 
-/* تم إزالة حركات الانعكاس لزيادة سرعة الصفحة */
 .char.broken-bulb .reflection {
     animation: none !important;
 }
 
-/* تأخير حركة التحرك */
 .char.broken-bulb:nth-child(1) { animation-delay: 0s, 0s; }
 .char.broken-bulb:nth-child(2) { animation-delay: 0.3s, 0.2s; }
 .char.broken-bulb:nth-child(3) { animation-delay: 0.6s, 0.4s; }
@@ -7174,7 +7147,6 @@ body.dark-mode #compare-bar {
 .char.broken-bulb:nth-child(5) { animation-delay: 0.5s, 0.3s; }
 .char.broken-bulb:nth-child(6) { animation-delay: 0.1s, 0.05s; }
 
-/* Skeleton Loading Effect */
 .skeleton-loading {
     position: relative;
     overflow: hidden;
@@ -7223,7 +7195,6 @@ body.dark-mode .skeleton-loading::after {
     opacity: 0;
 }
 
-/* Mobile Search Bar Fix - Sticky to top on scroll */
 @media (max-width: 992px) {
     header.scrolled {
         position: fixed;
@@ -7247,16 +7218,15 @@ body.dark-mode .skeleton-loading::after {
     }
     
     header.scrolled .header-top-row {
-        display: none; /* Hide logo and other icons to focus on search */
+        display: none; 
     }
 }
 
-/* Desktop Header Enhancements */
 @media (min-width: 993px) {
     .header-actions .action-btn, 
     .header-actions .theme-toggle,
     .header-actions .search-trigger {
-        font-size: 1.5rem; /* تكبير الأيقونات */
+        font-size: 1.5rem; 
         padding: 10px;
         margin: 0 5px;
         transition: var(--transition);
@@ -7266,7 +7236,6 @@ body.dark-mode .skeleton-loading::after {
         font-size: 1.6rem;
     }
 
-    /* Colored Icons in Dark Mode */
     body.dark-mode .header-actions .action-btn.wishlist-trigger i { color: #ff4757; }
     body.dark-mode .header-actions .action-btn.cart-trigger i { color: #2ed573; }
     body.dark-mode .header-actions .whatsapp-header i { color: #25D366; }
@@ -7280,16 +7249,14 @@ body.dark-mode .skeleton-loading::after {
     }
 }
 
-/* Smooth transitions for all interactive elements */
 .action-btn, .btn-primary, .category-slide-card, .product-card-v2 {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Swiper Mobile Enhancements */
 @media (max-width: 768px) {
     .category-swiper, .random-products-slider, .featured-slider {
-        padding-bottom: 40px !important; /* مساحة للـ pagination */
-        overflow: visible !important; /* للسماح بظهور الظلال والعناصر المجاورة */
+        padding-bottom: 40px !important; 
+        overflow: visible !important;
     }
     
     .swiper-pagination-bullet {
@@ -7306,7 +7273,7 @@ body.dark-mode .skeleton-loading::after {
     }
     
     .category-slide-content h3 {
-        font-size: 1.2rem; /* تصغير الخط قليلاً ليتناسب مع الموبايل */
+        font-size: 1.2rem; 
     }
     
     .category-slide-content p {
@@ -7314,9 +7281,8 @@ body.dark-mode .skeleton-loading::after {
     }
 }
 
-/* تكبير الصور في السلايدر */
 .category-slide-card img, .product-card-v2 img {
-    object-fit: contain; /* لضمان ظهور الصورة بالكامل دون قص */
+    object-fit: contain; 
     background: #f9f9f9;
 }
 
