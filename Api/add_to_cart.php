@@ -1,12 +1,9 @@
 <?php
-// add_to_cart.php
 session_start();
 
-// تعطيل عرض الأخطاء مباشرة في المخرجات لمنع إفساد تنسيق JSON
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-// تصحيح المسار للوصول لملف db.php الموجود في مجلد Model
 require_once __DIR__ . '/../Model/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -20,7 +17,6 @@ class AddToCart {
     public function __construct($conn) {
         $this->conn = $conn;
         $this->userId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
-        // دعم POST و GET لزيادة التوافق
         $this->productId = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
         $this->quantity = isset($_REQUEST['qty']) ? max(1, (int)$_REQUEST['qty']) : 1;
     }
@@ -30,35 +26,29 @@ class AddToCart {
             return $this->errorResponse('فشل الاتصال بقاعدة البيانات');
         }
 
-        // Validate product ID
         if ($this->productId <= 0) {
             return $this->errorResponse('معرف المنتج غير صالح');
         }
         
-        // Get product details and stock
         $product = $this->getProductDetails();
         if (!$product) {
             return $this->errorResponse('المنتج غير موجود');
         }
         
-        // Check stock availability
         if ($product['stock'] <= 0) {
             return $this->errorResponse('المنتج غير متاح حالياً');
         }
         
-        // Calculate how many can be added
         $canAdd = $this->calculateAvailableQuantity($product['stock']);
         if ($canAdd <= 0) {
             return $this->errorResponse('لا يمكن إضافة المزيد من هذا المنتج (نفد المخزون)');
         }
         
-        // Add to cart
         $added = $this->addProductToCart($canAdd);
         if (!$added) {
             return $this->errorResponse('فشل إضافة المنتج إلى السلة');
         }
         
-        // Get updated cart totals
         $cartTotals = $this->getCartTotals();
         
         return $this->successResponse($canAdd, $product['stock'], $cartTotals);
