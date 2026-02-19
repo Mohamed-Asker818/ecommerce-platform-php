@@ -1,26 +1,20 @@
 <?php
-// product.php - Main entry point
 session_start();
 
-// 1. Smarty Setup and Path Fix
 require_once '../Smarty/libs/Smarty.class.php';
 require_once '../Model/db.php';
 
-// Initialize Smarty
 $smarty = new Smarty();
 $smarty->setTemplateDir('../Views/');
 $smarty->setCompileDir('../Templates_c/');
 $smarty->setCacheDir('../Cache/');
 
-// Check if product ID is provided
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if ($id <= 0) {
-    // Use Smarty to redirect or display an error page if needed, but for now, keep the header redirect
     header('Location: Home.php');
     exit;
 }
 
-// Get product data with high-quality image
 $stmt = $conn->prepare("SELECT *, 
                        COALESCE(CONCAT('uploads/high-quality/', image), image) as hq_image 
                        FROM products WHERE id = ? LIMIT 1");
@@ -36,10 +30,8 @@ if ($res->num_rows === 0) {
 $product = $res->fetch_assoc();
 $stmt->close();
 
-// Use high-quality image if available
 $product['display_image'] = !empty($product['hq_image']) ? $product['hq_image'] : $product['image'];
 
-// Get similar products with high-quality images
 $similar_products = [];
 $similar_stmt = $conn->prepare("SELECT id, name, price, 
                                COALESCE(CONCAT('uploads/high-quality/', image), image) as display_image 
@@ -54,7 +46,6 @@ while($row = $similar_result->fetch_assoc()) {
 }
 $similar_stmt->close();
 
-// Get cart count
 $cart_count = 0;
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
@@ -70,11 +61,9 @@ if (isset($_SESSION['user_id'])) {
     $cart_count = array_sum($_SESSION['cart']);
 }
 
-// 2. Assign data to Smarty
 $smarty->assign('product', $product);
 $smarty->assign('similar_products', $similar_products);
 $smarty->assign('cart_count', $cart_count);
 
-// 3. Display the template
 $smarty->display('product.html');
 ?>
