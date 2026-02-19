@@ -242,11 +242,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             $safe_filename_add = uniqid('p_', true) . '_add_' . $sort_order;
                                             $mainImagePathServerAdd = $uploadDirServer . $safe_filename_add . '.jpg';
 
-                                            // حفظ الصورة الإضافية كـ JPG
                                             if (save_resized_jpeg($srcImgAdd, $mainImagePathServerAdd, 1200, 90)) {
                                                 $publicImagePathAdd = 'products/' . basename($mainImagePathServerAdd);
                                                 
-                                                // إدراج في جدول الصور الإضافية
                                                 $insertImageStmt->bind_param("isi", $insertId, $publicImagePathAdd, $sort_order);
                                                 $insertImageStmt->execute();
                                                 $sort_order++;
