@@ -1,10 +1,8 @@
-// register.js - Enhanced with animations and visual effects
 class RegisterSystem {
     constructor() {
         this.isLoading = false;
         this.currentStep = 1;
         
-        // Elements
         this.elements = {
             form: document.getElementById('register-form'),
             submitBtn: document.getElementById('register-btn'),
@@ -16,7 +14,6 @@ class RegisterSystem {
             progressFill: document.getElementById('form-progress')
         };
         
-        // API endpoints
         this.endpoints = {
             checkField: '../Api/register_api.php?action=check_field',
             suggest: '../Api/register_api.php?action=suggest',
@@ -36,7 +33,6 @@ class RegisterSystem {
     }
     
     bindEvents() {
-        // Form submission
         if (this.elements.form) {
             this.elements.form.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -44,21 +40,18 @@ class RegisterSystem {
             });
         }
         
-        // Notification close
         if (this.elements.notificationClose) {
             this.elements.notificationClose.addEventListener('click', () => {
                 this.hideNotification();
             });
         }
         
-        // Auto-hide notification
         document.addEventListener('click', (e) => {
             if (!this.elements.notification.contains(e.target)) {
                 this.hideNotification();
             }
         });
         
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.hideNotification();
@@ -70,7 +63,6 @@ class RegisterSystem {
     }
     
     setupPasswordToggle() {
-        // Password toggle
         if (this.elements.passwordToggle) {
             this.elements.passwordToggle.addEventListener('click', () => {
                 const passwordInput = document.getElementById('password');
@@ -78,7 +70,6 @@ class RegisterSystem {
             });
         }
         
-        // Confirm password toggle
         if (this.elements.confirmToggle) {
             this.elements.confirmToggle.addEventListener('click', () => {
                 const confirmInput = document.getElementById('confirm_password');
@@ -91,10 +82,8 @@ class RegisterSystem {
         const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
         input.setAttribute('type', type);
         
-        // Toggle icon
         toggleBtn.classList.toggle('show');
         
-        // Add animation
         toggleBtn.style.transform = 'translateY(-50%) scale(1.2)';
         setTimeout(() => {
             toggleBtn.style.transform = 'translateY(-50%) scale(1)';
@@ -114,19 +103,16 @@ class RegisterSystem {
                 timeout = setTimeout(() => {
                     this.validateField(field, input.value);
                     
-                    // Update progress based on field completion
                     this.updateProgress();
                 }, 500);
             });
             
-            // Validate on blur
             input.addEventListener('blur', () => {
                 if (input.value.trim()) {
                     this.validateField(field, input.value);
                 }
             });
             
-            // Add focus effects
             input.addEventListener('focus', () => {
                 input.parentElement.classList.add('focused');
                 this.updateStep(this.getFieldStep(field));
@@ -137,7 +123,6 @@ class RegisterSystem {
             });
         });
         
-        // Special handling for password match
         const passwordInput = document.getElementById('password');
         const confirmInput = document.getElementById('confirm_password');
         
@@ -201,7 +186,6 @@ class RegisterSystem {
         const passwordInput = document.getElementById('password');
         if (!passwordInput) return;
         
-        // Initialize requirements
         const requirements = document.querySelectorAll('.requirement');
         requirements.forEach(req => {
             req.classList.remove('valid');
@@ -219,26 +203,22 @@ class RegisterSystem {
         let message = 'None';
         let color = '#ef4444';
         
-        // Check requirements
         const hasLength = password.length >= 6;
         const hasLetter = /[a-zA-Z]/.test(password);
         const hasNumber = /[0-9]/.test(password);
         const hasSpecial = /[^A-Za-z0-9]/.test(password);
         
-        // Update requirement indicators
         this.updateRequirement('length', hasLength);
         this.updateRequirement('letter', hasLetter);
         this.updateRequirement('number', hasNumber);
         this.updateRequirement('special', hasSpecial);
         
-        // Calculate strength
         if (hasLength) strength++;
         if (hasLetter) strength++;
         if (hasNumber) strength++;
         if (hasSpecial) strength++;
         if (password.length >= 10) strength++;
         
-        // Update UI
         switch (strength) {
             case 0:
                 message = 'None';
@@ -271,7 +251,6 @@ class RegisterSystem {
         strengthMeter.style.background = `linear-gradient(90deg, ${color}, ${color}60)`;
         strengthMeter.style.width = `${(strength / 5) * 100}%`;
         
-        // Update dots
         dots.forEach((dot, index) => {
             if (index < strength) {
                 dot.classList.add('active');
@@ -313,10 +292,8 @@ class RegisterSystem {
     }
     
     async validateField(field, value) {
-        // Clear previous error and suggestions
         this.clearValidation(field);
         
-        // Skip empty optional fields
         if ((field === 'phone') && !value.trim()) {
             return true;
         }
@@ -346,7 +323,6 @@ class RegisterSystem {
                 } else {
                     this.markInvalid(field, data.message);
                     
-                    // Show suggestions if available
                     if (data.suggestions && data.suggestions.length > 0) {
                         this.showSuggestions(field, data.suggestions);
                     }
@@ -371,7 +347,6 @@ class RegisterSystem {
             input.classList.remove('invalid');
             input.classList.add('valid');
             
-            // Add success animation
             this.animateSuccess(input);
         }
         
@@ -380,7 +355,6 @@ class RegisterSystem {
             error.classList.remove('show');
         }
         
-        // Remove suggestions
         this.removeSuggestions(field);
     }
     
@@ -415,14 +389,11 @@ class RegisterSystem {
     }
     
     showSuggestions(field, suggestions) {
-        // Remove existing suggestions
         this.removeSuggestions(field);
         
-        // Create suggestions container
         const container = document.createElement('div');
         container.className = 'suggestions-container';
         
-        // Add suggestion items
         suggestions.forEach((suggestion, index) => {
             const item = document.createElement('div');
             item.className = 'suggestion-item';
@@ -432,7 +403,6 @@ class RegisterSystem {
                 <button class="suggestion-use-btn" data-suggestion="${suggestion}">Use</button>
             `;
             
-            // Add click event to use suggestion
             const useBtn = item.querySelector('.suggestion-use-btn');
             useBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -447,12 +417,10 @@ class RegisterSystem {
             container.appendChild(item);
         });
         
-        // Find the error container and insert suggestions after it
         const error = document.getElementById(`${field}-error`);
         if (error) {
             error.parentNode.insertBefore(container, error.nextSibling);
             
-            // Animate appearance
             setTimeout(() => {
                 container.style.opacity = '1';
                 container.style.transform = 'translateY(0)';
@@ -491,7 +459,6 @@ class RegisterSystem {
             }
         }
         
-        // Validate terms
         const termsCheckbox = document.getElementById('terms');
         if (!termsCheckbox.checked) {
             this.markInvalid('terms', 'You must agree to the terms');
@@ -532,7 +499,6 @@ async submitForm() {
         const result = await response.json();
 
         if (result.success) {
-            // success flow (same as before)
                 this.showNotification(result.msg || 'Account created successfully', 'success');
     this.setLoading(false);
     this.elements.submitBtn.disabled = true;
@@ -573,7 +539,6 @@ setTimeout(() => {
         this.elements.notificationMessage.textContent = message;
         this.elements.notification.className = `notification show ${type}`;
         
-        // Auto-hide after 5 seconds
         setTimeout(() => {
             this.hideNotification();
         }, 5000);
@@ -585,7 +550,6 @@ setTimeout(() => {
         }
     }
     
-    // Animation methods
     shakeElement(element) {
         element.classList.add('shake');
         setTimeout(() => {
@@ -608,7 +572,6 @@ setTimeout(() => {
             const particle = document.createElement('div');
             particle.className = 'particle';
             
-            // Random position and size
             const size = Math.random() * 5 + 2;
             const posX = Math.random() * 100;
             const posY = Math.random() * 100;
@@ -624,7 +587,6 @@ setTimeout(() => {
             particle.style.background = `rgba(255, 255, 255, ${Math.random() * 0.3 + 0.1})`;
             particle.style.borderRadius = '50%';
             
-            // Add floating animation
             particle.style.position = 'absolute';
             particle.style.animation = `float ${duration}s infinite linear`;
             
@@ -659,11 +621,9 @@ setTimeout(() => {
     }
 }
 
-// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.registerSystem = new RegisterSystem();
     
-    // Add CSS animations
     const style = document.createElement('style');
     style.textContent = `
         .shake {
@@ -694,7 +654,6 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
     
-    // Focus on name field with animation
     setTimeout(() => {
         const nameField = document.getElementById('name');
         if (nameField) {
