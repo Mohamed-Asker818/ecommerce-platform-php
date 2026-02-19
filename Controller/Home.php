@@ -1,19 +1,18 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/../Model/db.php';
 require_once __DIR__ . '/cache.php';
 require_once __DIR__ . '/../Smarty/libs/Smarty.class.php';
 
-// توليد CSRF token إذا لم يكن موجود
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-$cache = new SimpleCache(300); // زيادة مدة الكاش الافتراضية إلى 5 دقائق لسرعة أكبر
+$cache = new SimpleCache(300);
 $smarty = new Smarty();
 $smarty->registerPlugin('modifier', 'urlencode', 'urlencode');
 $smarty->registerPlugin('modifier', 'number_format', 'number_format');
@@ -22,7 +21,6 @@ $smarty->setCompileDir(__DIR__ . '/templates_c/');
 $smarty->setCacheDir(__DIR__ . '/cache/');
 $smarty->setConfigDir(__DIR__ . '/configs/');
 
-// ====== Mobile detection ======
 if (is_file(__DIR__ . '/../Api/mobile_detection.php')) {
     include_once __DIR__ . '/../Api/mobile_detection.php';
     $show_mobile_splash = function_exists('should_show_mobile_ui') ? should_show_mobile_ui() : false;
@@ -30,11 +28,9 @@ if (is_file(__DIR__ . '/../Api/mobile_detection.php')) {
     $show_mobile_splash = false;
 }
 
-// ==== Helper functions ====
 function safe_int($v) { return isset($v) ? (int)$v : 0; }
 function safe_float($v) { return isset($v) ? (float)$v : 0.0; }
 
-// ====== Wishlist ======
 $wishlist = [];
 if (isset($_SESSION['user_id'])) {
     $uid = intval($_SESSION['user_id']);
@@ -53,7 +49,6 @@ if (isset($_SESSION['user_id'])) {
 }
 $wishlistCount = count($wishlist);
 
-// ====== Cart ======
 $cart = [];
 if (isset($_SESSION['user_id'])) {
     $uid = intval($_SESSION['user_id']);
@@ -80,19 +75,16 @@ if (isset($_SESSION['user_id'])) {
 }
 $cartCount = array_sum($cart);
 
-// ====== Compare ======
 $compare_ids = isset($_SESSION['compare']) ? array_keys($_SESSION['compare']) : [];
 $compareCount = count($compare_ids);
 
-// ====== Filters / Search / Pagination ======
 $searchRaw = isset($_GET['q']) ? $_GET['q'] : '';
 $search = "{$searchRaw}%";
 
-$perPage = 20; // تقليل عدد المنتجات في الصفحة الواحدة لسرعة التحميل
+$perPage = 20;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $start = ($page - 1) * $perPage;
 
-// بناء WHERE ديناميكي
 $whereSQL = "WHERE name LIKE ?";
 $params = [$search];
 $types = "s";
@@ -113,7 +105,6 @@ if (isset($_GET['max']) && $_GET['max'] !== '') {
     $types .= "d";
 }
 
-// Sorting
 $orderSQL = "ORDER BY id DESC";
 if (!empty($_GET['sort'])) {
     switch ($_GET['sort']) {
@@ -129,7 +120,6 @@ if (!empty($_GET['sort'])) {
     }
 }
 
-// ====== Query المنتجات مع LIMIT ======
 $sql = "SELECT id, name, price, old_price, stock, is_new, image, countdown FROM products $whereSQL $orderSQL LIMIT ?, ?";
 $paramsWithLimit = $params;
 $paramsWithLimit[] = $start;
@@ -148,7 +138,6 @@ if ($stmt === false) {
     }
 }
 
-// bind params dynamic
 $bindParams = [];
 foreach ($paramsWithLimit as $k => $v) {
     $bindParams[$k] = &$paramsWithLimit[$k];
@@ -166,7 +155,6 @@ if ($products === false) {
 }
 $stmt->close();
 
-// ====== Count total ======
 $countSql = "SELECT COUNT(*) as total FROM products $whereSQL";
 $countStmt = $conn->prepare($countSql);
 if ($countStmt === false) {
@@ -197,23 +185,18 @@ $countStmt->close();
 $totalPages = max(1, ceil($total / $perPage));
 $hasNextPage = $page < $totalPages;
 
-// ====== featured ======
-// استبدال ORDER BY RAND() بترتيب ثابت لتحسين الأداء، مع وجود عمود featured
 $featuredSql = "SELECT id, name, price, old_price, image FROM products WHERE featured = 1 ORDER BY created_at DESC LIMIT 4";
 $featuredRes = $conn->query($featuredSql);
 $featuredProducts = $featuredRes ? $featuredRes->fetch_all(MYSQLI_ASSOC) : [];
 
-// ====== ratings ======
 $productIds = [];
 foreach ($products as $p) { $productIds[] = (int)$p['id']; }
 $ratings = [];
 if (!empty($productIds)) {
-    // استخدام prepared statement لـ IN clause
     $placeholders = implode(',', array_fill(0, count($productIds), '?'));
     $ratingSql = "SELECT product_id, AVG(rating) as avg_rating, COUNT(*) as cnt FROM product_ratings WHERE product_id IN ($placeholders) GROUP BY product_id";
     $ratingStmt = $conn->prepare($ratingSql);
     if ($ratingStmt) {
-        // بناء types string و bind params
         $typesStr = str_repeat('i', count($productIds));
         $ratingStmt->bind_param($typesStr, ...$productIds);
         $ratingStmt->execute();
@@ -228,7 +211,6 @@ if (!empty($productIds)) {
     }
 }
 
-// ====== user info ======
 $userName = '';
 $userAvatar = 'default_avatar.png';
 $loggedIn = false;
@@ -255,7 +237,6 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 
-// ====== categories ======
 $categories = [];
 $catStmt = $conn->query("SELECT c.id, c.name, c.image, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON c.id = p.category_id GROUP BY c.id ORDER BY c.id");
 while ($cat = $catStmt->fetch_assoc()) {
@@ -267,20 +248,17 @@ while ($cat = $catStmt->fetch_assoc()) {
     ];
 }
 
-// ====== random products (Optimized: No ORDER BY RAND()) ======
 $randomKey = 'random_products_home';
 $randomProducts = $cache->get($randomKey);
 if ($randomProducts === false) {
     $randomSql = "SELECT id, name, price, old_price, image FROM products LIMIT 10";
     $randomRes = $conn->query($randomSql);
     $randomProducts = $randomRes ? $randomRes->fetch_all(MYSQLI_ASSOC) : [];
-    $cache->set($randomKey, $randomProducts, 3600); // كاش لمدة ساعة
+    $cache->set($randomKey, $randomProducts, 3600);
 }
 
-// ====== تحسين استجابة AJAX ======
 $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 
-// إذا كانت فئة محددة، أحصل على اسمها
 $selectedCategoryName = '';
 $currentCategoryId = isset($_GET['category']) ? intval($_GET['category']) : '';
 if (!empty($currentCategoryId)) {
@@ -296,7 +274,6 @@ if (!empty($currentCategoryId)) {
     }
 }
 
-// ====== prepare product payload (for JSON) and prepare for template (sanitized) ======
 $productPayload = [];
 foreach ($products as $row) {
     $pid = (int)$row['id'];
@@ -305,21 +282,21 @@ foreach ($products as $row) {
     if (!empty($row['old_price']) && $row['old_price'] > $row['price']) {
         $discount = round((($row['old_price'] - $row['price']) / $row['old_price']) * 100);
     }
-	    $productPayload[] = [
-	        'id' => $pid,
-	        'name' => htmlspecialchars($row['name']),
-	        'price' => (float)$row['price'],
-	        'old_price' => isset($row['old_price']) ? (float)$row['old_price'] : 0,
-	        'stock' => (int)$row['stock'],
-	        'is_new' => (bool)$row['is_new'],
-	        'image' => $imgName,
-	        'discount' => $discount,
-	        'rating' => isset($ratings[$pid]) ? $ratings[$pid]['avg'] : 0,
-	        'rating_count' => isset($ratings[$pid]) ? $ratings[$pid]['cnt'] : 0,
-	        'in_wishlist' => in_array($pid, $wishlist),
-	        'in_compare' => in_array($pid, $compare_ids),
-	        'countdown' => $row['countdown']
-	    ];
+    $productPayload[] = [
+        'id' => $pid,
+        'name' => htmlspecialchars($row['name']),
+        'price' => (float)$row['price'],
+        'old_price' => isset($row['old_price']) ? (float)$row['old_price'] : 0,
+        'stock' => (int)$row['stock'],
+        'is_new' => (bool)$row['is_new'],
+        'image' => $imgName,
+        'discount' => $discount,
+        'rating' => isset($ratings[$pid]) ? $ratings[$pid]['avg'] : 0,
+        'rating_count' => isset($ratings[$pid]) ? $ratings[$pid]['cnt'] : 0,
+        'in_wishlist' => in_array($pid, $wishlist),
+        'in_compare' => in_array($pid, $compare_ids),
+        'countdown' => $row['countdown']
+    ];
 }
 
 $featuredPayload = [];
@@ -354,7 +331,6 @@ $phpVars = [
     'currentCategoryId' => $currentCategoryId
 ];
 
-// ====== Final response payload (for JSON) ======
 $response = [
     'ok' => true,
     'show_mobile_splash' => (bool)$show_mobile_splash,
@@ -375,14 +351,12 @@ $response = [
     'phpVars' => $phpVars
 ];
 
-// ====== إذا الطلب JSON أو AJAX => رجع JSON ======
 if ($isAjax || (isset($_GET['format']) && $_GET['format'] === 'json')) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     exit;
 }
 
-// ====== خلاف ذلك => عرض قالب Smarty ======
 $smarty->assign('csrf_token', $_SESSION['csrf_token']);
 $smarty->assign('show_mobile_splash', (bool)$show_mobile_splash);
 $smarty->assign('logged_in', $loggedIn);
@@ -394,9 +368,7 @@ $smarty->assign('featured', $featuredPayload);
 $smarty->assign('random_products', $randomPayload);
 $smarty->assign('selectedCategoryName', $selectedCategoryName);
 $smarty->assign('currentCategoryId', $currentCategoryId);
-// phpVarsJson جاهز للـ JS داخل القالب
 $smarty->assign('phpVarsJson', json_encode($phpVars, JSON_UNESCAPED_UNICODE));
 $smarty->assign('year', date('Y'));
 
-// أخيراً عرض القالب
 $smarty->display('../Views/Home.html');
