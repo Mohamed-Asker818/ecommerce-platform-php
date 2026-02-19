@@ -16,14 +16,11 @@ if ($id <= 0 || empty($status)) {
     exit;
 }
 
-// تحديث حالة الطلب
 $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
 $stmt->bind_param("si", $status, $id);
 
 if ($stmt->execute()) {
-    // إذا تم التسليم، نقوم بتسجيل أن هذا الطلب جاهز للتعليق
-    // النظام الآن يعتمد على حالة الطلب 'delivered' أو 'completed' لإظهار الإشعارات تلقائياً للمستخدم
-    // في صفحة الرئيسية عبر AJAX في Home.js
+   
     echo json_encode(['success' => true, 'msg' => 'تم تحديث حالة الطلب بنجاح']);
 } else {
     echo json_encode(['success' => false, 'msg' => 'فشل تحديث حالة الطلب']);
