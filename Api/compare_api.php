@@ -1,15 +1,12 @@
 <?php
-// compare_api.php - الإصدار المصحح
 session_start();
 
-// التحقق من بدء الجلسة
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 header('Content-Type: application/json; charset=utf-8');
 
-// تهيئة المقارنة إذا لم تكن موجودة
 if (!isset($_SESSION['compare'])) {
     $_SESSION['compare'] = [];
 }
@@ -36,7 +33,7 @@ try {
             handleClearAll();
             break;
             
-        case 'get_columns': // إضافة إجراء جديد للتحقق من الأعمدة
+        case 'get_columns': 
             handleGetColumns($conn);
             break;
             
@@ -69,10 +66,8 @@ function handleGetData($conn) {
         return;
     }
     
-    // أولا: التحقق من الأعمدة الموجودة في الجدول
     $columns = getExistingColumns($conn);
     
-    // ثانيا: بناء الاستعلام مع الأعمدة الموجودة فقط
     $placeholders = str_repeat('?,', count($productIds) - 1) . '?';
     $columnsList = implode(', ', $columns);
     
@@ -83,7 +78,6 @@ function handleGetData($conn) {
         throw new Exception('خطأ في تحضير الاستعلام: ' . $conn->error);
     }
     
-    // ربط المعاملات
     $types = str_repeat('i', count($productIds));
     $stmt->bind_param($types, ...$productIds);
     
@@ -108,7 +102,6 @@ function handleGetData($conn) {
 }
 
 function getExistingColumns($conn) {
-    // الأعمدة الأساسية التي نريد عرضها
     $desiredColumns = [
         'id',
         'name', 
@@ -118,7 +111,6 @@ function getExistingColumns($conn) {
         'description'
     ];
     
-    // الأعمدة الاختيارية (قد لا تكون موجودة)
     $optionalColumns = [
         'old_price',
         'category',
@@ -129,7 +121,6 @@ function getExistingColumns($conn) {
         'specifications'
     ];
     
-    // التحقق من الأعمدة الموجودة فعلياً
     $existingColumns = [];
     $result = $conn->query("SHOW COLUMNS FROM products");
     
@@ -139,20 +130,16 @@ function getExistingColumns($conn) {
         }
     }
     
-    // تحديد الأعمدة التي سنستخدمها
     $selectedColumns = [];
     
-    // إضافة الأعمدة الأساسية (يجب أن تكون موجودة)
     foreach ($desiredColumns as $column) {
         if (in_array($column, $existingColumns)) {
             $selectedColumns[] = $column;
         } else {
-            // إذا كان العمود الأساسي غير موجود، أضفه مع قيمة افتراضية
             $selectedColumns[] = "' ' as $column";
         }
     }
     
-    // إضافة الأعمدة الاختيارية إذا كانت موجودة
     foreach ($optionalColumns as $column) {
         if (in_array($column, $existingColumns)) {
             $selectedColumns[] = $column;
@@ -163,7 +150,6 @@ function getExistingColumns($conn) {
 }
 
 function formatProductData($row) {
-    // قيم افتراضية للأعمدة التي قد لا تكون موجودة
     $defaultValues = [
         'id' => 0,
         'name' => 'منتج غير معروف',
@@ -183,7 +169,6 @@ function formatProductData($row) {
     
     foreach ($defaultValues as $key => $defaultValue) {
         if (isset($row[$key])) {
-            // تنظيف وتنسيق القيمة
             $value = $row[$key];
             
             switch($key) {
