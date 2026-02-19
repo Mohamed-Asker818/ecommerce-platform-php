@@ -7,14 +7,12 @@
     <title>✨ المتجر البسيط | تجربة تسوق استثنائية</title>
     <link rel="icon" type="image/png" href="../Assets/images/favicon.png" />
     
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="../Controller/Home.php" />
     <meta property="og:title" content="✨ المتجر البسيط | تجربة تسوق استثنائية" />
     <meta property="og:description" content="اكتشف تشكيلتنا الحصرية من المنتجات البسيطة بأفضل الأسعار." />
     <meta property="og:image" content="../Assets/images/share.png" />
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
@@ -23,14 +21,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet" /></noscript>
     
-    <!-- Icons & Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" media="print" onload="this.media='all'" />
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" media="print" onload="this.media='all'" />
     
-    <!-- Custom Styles -->
     <style>
-      /* Critical CSS for fast first paint */
       :root { --primary: #C5A059; --secondary: #1A1A1A; --white: #FFFFFF; }
       body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
       #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; }
@@ -40,7 +35,6 @@
     <link rel="stylesheet" href="../Assets/css/Home.css" media="print" onload="this.media='all'" />
     <script src="../Assets/js/Home.js" defer></script>
     
-    <!-- PWA -->
     <link rel="manifest" href="../Assets/Services/manifest.json" />
     <meta name="theme-color" content="#C5A059" />
 
@@ -61,7 +55,6 @@
     {/literal}
   </head>
   <body>
-    <!-- Preloader & Audio Activation -->
     <div id="preloader">
         <div class="loader-content">
             <span class="loader-logo">✨</span>
@@ -73,7 +66,6 @@
     </div>
 
     <div class="app-wrapper">
-      <!-- Top Bar -->
       <div class="top-bar">
           <div class="container">
               <div class="top-bar-content">
@@ -89,7 +81,6 @@
           </div>
       </div>
 
-      <!-- Compare Bar -->
       <div id="compare-bar" class="compare-bar-premium">
         <div class="container">
             <div class="compare-content">
@@ -113,10 +104,8 @@
         </div>
       </div>
 
-      <!-- Toast Notifications -->
       <div id="toast-region" role="status" aria-live="polite"></div>
 
-      <!-- Header -->
       <header id="main-header">
         <div class="container header-container">
             <div class="header-top-row">
@@ -172,7 +161,6 @@
                 </div>
             </div>
 
-            <!-- Search Bar -->
             <div class="search-wrapper">
                 <form id="search-form" action="../Controller/Home.php" method="GET" class="search-form">
                     <input type="text" id="search-input" name="q" class="search-input" placeholder="ابحث عن منتج، فئة، ماركة..." 
@@ -185,7 +173,6 @@
             </div>
         </div>
 
-        <!-- Full Screen Search -->
         <div class="search-overlay" id="search-overlay">
             <button class="search-close"><i class="fas fa-times"></i></button>
             <div class="search-container">
@@ -200,43 +187,40 @@
         </div>
       </header>
 
-	      <!-- Cinematic Hero Section (Optimized) -->
-		      <section class="cinematic-hero" id="hero-story">
-		        <div class="hero-layers">
-	            <div class="layer layer-bg" style="background-image: url('../Assets/images/video-poster.jpg');"></div>
-	            <div class="layer layer-overlay"></div>
-	            <div class="layer layer-content">
-		                <div class="hero-glass-container neon-board">
-		                    <div class="hero-statement">
-		                        <div class="impact-wrapper">
-			                            <div class="impact-text-container" data-text="BEYOND">
-	                                        <h1 class="statement-title impact-text" dir="ltr">
-	                                            <span class="char" data-char="B">B<span class="reflection">B</span></span>
-	                                            <span class="char" data-char="E">E<span class="reflection">E</span></span>
-	                                            <span class="char" data-char="Y">Y<span class="reflection">Y</span></span>
-	                                            <span class="char" data-char="O">O<span class="reflection">O</span></span>
-	                                            <span class="char" data-char="N">N<span class="reflection">N</span></span>
-	                                            <span class="char loose-d" data-char="D">D<span class="reflection">D</span></span>
-	                                        </h1>
-                                            <div class="golden-underline"></div>
-	                                    </div>
-			                            <!-- Spark and Dust Containers -->
-			                            <div class="spark-container"></div>
-			                            <div class="dust-container"></div>
-		                        </div>
-	                        <div class="hero-actions">
-	                            <a href="#products-container" class="btn-hero-explore">
-	                                <span>اكتشف المنتجات</span>
-	                                <i class="fas fa-chevron-down"></i>
-	                            </a>
-	                        </div>
-		                    </div>
-		                </div>
-	            </div>
+      <section class="cinematic-hero" id="hero-story">
+        <div class="hero-layers">
+          <div class="layer layer-bg" style="background-image: url('../Assets/images/video-poster.jpg');"></div>
+          <div class="layer layer-overlay"></div>
+          <div class="layer layer-content">
+            <div class="hero-glass-container neon-board">
+              <div class="hero-statement">
+                <div class="impact-wrapper">
+                  <div class="impact-text-container" data-text="BEYOND">
+                    <h1 class="statement-title impact-text" dir="ltr">
+                      <span class="char" data-char="B">B<span class="reflection">B</span></span>
+                      <span class="char" data-char="E">E<span class="reflection">E</span></span>
+                      <span class="char" data-char="Y">Y<span class="reflection">Y</span></span>
+                      <span class="char" data-char="O">O<span class="reflection">O</span></span>
+                      <span class="char" data-char="N">N<span class="reflection">N</span></span>
+                      <span class="char loose-d" data-char="D">D<span class="reflection">D</span></span>
+                    </h1>
+                    <div class="golden-underline"></div>
+                  </div>
+                  <div class="spark-container"></div>
+                  <div class="dust-container"></div>
+                </div>
+                <div class="hero-actions">
+                  <a href="#products-container" class="btn-hero-explore">
+                    <span>اكتشف المنتجات</span>
+                    <i class="fas fa-chevron-down"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- Infinite Trust Slider -->
       <section class="trust-slider-section">
           <div class="trust-slider-track">
               <div class="trust-item"><i class="fas fa-shipping-fast"></i> شحن سريع عالمي</div>
@@ -244,7 +228,6 @@
               <div class="trust-item"><i class="fas fa-hand-holding-usd"></i> دفع عند الاستلام</div>
               <div class="trust-item"><i class="fas fa-check-circle"></i> منتجات أصلية 100%</div>
               <div class="trust-item"><i class="fas fa-headset"></i> دعم فني 24/7</div>
-              <!-- Duplicate for infinite effect -->
               <div class="trust-item"><i class="fas fa-shipping-fast"></i> شحن سريع عالمي</div>
               <div class="trust-item"><i class="fas fa-undo"></i> ضمان استرجاع 30 يوم</div>
               <div class="trust-item"><i class="fas fa-hand-holding-usd"></i> دفع عند الاستلام</div>
@@ -253,33 +236,30 @@
           </div>
       </section>
 
-      <!-- Experience Story Section - REMOVED FOR CLEANER DESIGN -->
-
-      <!-- Categories Slider -->
       <section class="category-slider-section">
         <div class="container">
             <div class="section-header">
-	                <h2 class="section-title" id="cat-title"><i class="fas fa-tags"></i> تسوق حسب الفئة</h2>
+                <h2 class="section-title" id="cat-title"><i class="fas fa-tags"></i> تسوق حسب الفئة</h2>
             </div>
             <div class="category-slider-container">
                 <div class="swiper category-swiper">
-<div class="swiper-wrapper" id="category-slider-container">
-	                        {if isset($categories) && count($categories) > 0}
-	                            {foreach from=$categories item=cat}
-	                            <div class="swiper-slide">
-	                                <div class="category-slide-card skeleton-loading" data-category-id="{$cat.id}" onclick="window.HomeApp.filterAndScroll('{$cat.id}')">
-	                                    <img src="../Controller/image.php?src={$cat.image|urlencode}&w=300&h=300&q=80" 
-	                                         alt="{$cat.name|escape:'html'}" 
-	                                         loading="lazy" 
-	                                         onload="this.parentElement.classList.remove('skeleton-loading')"
-	                                         onerror="this.src='../Assets/images/default-category.jpg'; this.parentElement.classList.remove('skeleton-loading')" />
-	                                    <div class="category-slide-content">
-	                                        <h3>{$cat.name|escape:'html'}</h3>
-	                                        <p>{$cat.count|default:0} منتج</p>
-	                                    </div>
-	                                </div>
-	                            </div>
-	                            {/foreach}
+                    <div class="swiper-wrapper" id="category-slider-container">
+                        {if isset($categories) && count($categories) > 0}
+                            {foreach from=$categories item=cat}
+                            <div class="swiper-slide">
+                                <div class="category-slide-card skeleton-loading" data-category-id="{$cat.id}" onclick="window.HomeApp.filterAndScroll('{$cat.id}')">
+                                    <img src="../Controller/image.php?src={$cat.image|urlencode}&w=300&h=300&q=80" 
+                                         alt="{$cat.name|escape:'html'}" 
+                                         loading="lazy" 
+                                         onload="this.parentElement.classList.remove('skeleton-loading')"
+                                         onerror="this.src='../Assets/images/default-category.jpg'; this.parentElement.classList.remove('skeleton-loading')" />
+                                    <div class="category-slide-content">
+                                        <h3>{$cat.name|escape:'html'}</h3>
+                                        <p>{$cat.count|default:0} منتج</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {/foreach}
                         {else}
                             <div class="no-categories">
                                 <i class="fas fa-folder-open fa-3x"></i>
@@ -287,7 +267,6 @@
                             </div>
                         {/if}
                     </div>
-                    <!-- أزرار التنقل -->
                     <div class="swiper-button-next"></div>
                     <div class="swiper-button-prev"></div>
                     <div class="swiper-pagination"></div>
@@ -296,15 +275,13 @@
         </div>
       </section>
 
-      <!-- Random Products Slides (Updated to Featured Style) -->
       <section class="random-products-section">
           <div class="container">
               <div class="section-header">
-	                  <h2 class="section-title" id="random-offer-title"><i class="fas fa-star"></i> العروض المميزة</h2>
+                  <h2 class="section-title" id="random-offer-title"><i class="fas fa-star"></i> العروض المميزة</h2>
               </div>
               <div class="swiper random-products-slider">
                   <div class="swiper-wrapper" id="random-products-container">
-                      <!-- سيتم تحميلها بواسطة JavaScript -->
                   </div>
                   <div class="swiper-pagination"></div>
                   <div class="swiper-button-next"></div>
@@ -313,10 +290,8 @@
           </div>
       </section>
 
-      <!-- Main Shopping Area -->
       <main class="main-shopping-area">
           <div class="container main-layout">
-              <!-- Products Grid -->
               <div class="shop-main">
                   <div class="shop-toolbar">
                       <div class="results-count">
@@ -414,7 +389,6 @@
                       {/if}
                   </section>
 
-                  <!-- Loading Indicators -->
                   <div id="infinite-scroll-trigger" class="scroll-trigger">
                       <div class="loading-spinner"></div>
                       <p>جاري تحميل المزيد من المنتجات...</p>
@@ -425,14 +399,12 @@
                   </button>
               </div>
 
-              <!-- Foldable Filters Sidebar -->
               <aside class="shop-sidebar" id="filter-sidebar">
                   <div class="sidebar-header">
                       <button class="toggle-fold-btn" id="toggle-fold-sidebar" title="طي/فتح التصفية">
                           <i class="fas fa-chevron-left"></i>
                       </button>
                       <h3><i class="fas fa-filter"></i> تصفية المنتجات</h3>
-<!-- Close Button Removed -->
                   </div>
                   <div class="sidebar-content">
                       <form id="filter-form">
@@ -490,7 +462,6 @@
           </div>
       </main>
 
-      <!-- Footer -->
       <footer class="main-footer">
           <div class="container">
               <div class="footer-top">
@@ -559,7 +530,6 @@
       </footer>
     </div>
 
-    <!-- Quick View Modal -->
     <div id="quick-view-modal" class="modal" style="display: none;">
         <div class="modal-overlay"></div>
         <div class="modal-container">
@@ -568,17 +538,14 @@
                 <button class="modal-close" aria-label="إغلاق"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body" id="quick-view-body">
-                <!-- سيتم تحميل محتوى العرض السريع هنا -->
             </div>
         </div>
     </div>
 
-    <!-- Mobile Splash Screen -->
     {if $show_mobile_splash}
         {include file='../Api/mobile_splash.php'}
     {/if}
 
-    <!-- Scripts -->
     <script id="php-vars" type="application/json">
     {
         "page": {if isset($current_page)}{$current_page}{else}1{/if},
@@ -595,9 +562,5 @@
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 
-    </div>
-
-    <!-- WhatsApp Elegant Float Button -->
-<!-- WhatsApp Float Removed -->
   </body>
 </html>
