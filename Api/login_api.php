@@ -1,5 +1,4 @@
 <?php
-// login_api.php
 session_start();
 require_once '../Model/db.php';
 
@@ -42,7 +41,6 @@ class LoginAPI {
             return $this->errorResponse('الرجاء ملء جميع الحقول');
         }
         
-        // Check user credentials
         $query = "SELECT id, name, email, password, phone, avatar, is_active 
                   FROM users WHERE email = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
@@ -51,31 +49,24 @@ class LoginAPI {
         $result = $stmt->get_result();
         
         if ($row = $result->fetch_assoc()) {
-            // Check if account is active
             if (!$row['is_active']) {
                 return $this->errorResponse('الحساب غير مفعل. يرجى التواصل مع الدعم');
             }
             
-            // Verify password
             if (password_verify($password, $row['password'])) {
-                // Regenerate session ID for security
                 session_regenerate_id(true);
                 
-                // Set session variables
                 $_SESSION['user_id'] = $row['id'];
                 $_SESSION['user_name'] = $row['name'];
                 $_SESSION['user_email'] = $row['email'];
                 $_SESSION['user_avatar'] = $row['avatar'] ?: 'default_avatar.png';
                 
-                // Handle remember me
                 if ($remember) {
                     $this->createRememberToken($row['id']);
                 }
                 
-                // Merge cart and wishlist from session to database
                 $this->mergeSessionData($row['id']);
                 
-                // Update last login
                 $this->updateLastLogin($row['id']);
                 
                 return $this->successResponse('تم تسجيل الدخول بنجاح', [
@@ -99,7 +90,6 @@ class LoginAPI {
         $confirm_password = $_POST['confirm_password'] ?? '';
         $phone = trim($_POST['phone'] ?? '');
         
-        // Validation
         if (empty($name) || empty($email) || empty($password)) {
             return $this->errorResponse('الرجاء ملء جميع الحقول المطلوبة');
         }
@@ -112,7 +102,6 @@ class LoginAPI {
             return $this->errorResponse('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
         }
         
-        // Check if email already exists
         $checkQuery = "SELECT id FROM users WHERE email = ? LIMIT 1";
         $checkStmt = $this->conn->prepare($checkQuery);
         $checkStmt->bind_param('s', $email);
@@ -122,13 +111,10 @@ class LoginAPI {
             return $this->errorResponse('البريد الإلكتروني مسجل بالفعل');
         }
         
-        // Hash password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
-        // Generate verification token
         $verificationToken = bin2hex(random_bytes(32));
         
-        // Insert new user
         $query = "INSERT INTO users (name, email, password, phone, verification_token, created_at) 
                   VALUES (?, ?, ?, ?, ?, NOW())";
         
@@ -138,10 +124,7 @@ class LoginAPI {
         if ($stmt->execute()) {
             $userId = $stmt->insert_id;
             
-            // Send verification email (in real app)
-            // $this->sendVerificationEmail($email, $verificationToken);
-            
-            // Auto login after registration
+        
             session_regenerate_id(true);
             $_SESSION['user_id'] = $userId;
             $_SESSION['user_name'] = $name;
@@ -166,7 +149,6 @@ class LoginAPI {
             return $this->errorResponse('الرجاء إدخال البريد الإلكتروني');
         }
         
-        // Check if email exists
         $query = "SELECT id, name FROM users WHERE email = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('s', $email);
@@ -174,21 +156,16 @@ class LoginAPI {
         $result = $stmt->get_result();
         
         if ($row = $result->fetch_assoc()) {
-            // Generate OTP
             $otp = rand(100000, 999999);
             $expires = date('Y-m-d H:i:s', strtotime('+15 minutes'));
             
-            // Store OTP in database
             $otpQuery = "INSERT INTO password_resets (user_id, otp, expires_at) 
                          VALUES (?, ?, ?)
                          ON DUPLICATE KEY UPDATE otp = ?, expires_at = ?";
             $otpStmt = $this->conn->prepare($otpQuery);
             $otpStmt->bind_param('issss', $row['id'], $otp, $expires, $otp, $expires);
             $otpStmt->execute();
-            
-            // In real app, send OTP via email/SMS
-            // $this->sendOTP($email, $otp);
-            
+                        
             return $this->successResponse('تم إرسال رمز التحقق إلى بريدك الإلكتروني', [
                 'user_id' => $row['id'],
                 'email' => $email
@@ -228,12 +205,10 @@ class LoginAPI {
         $newPassword = $_POST['new_password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
         
-        // Validate
         if (empty($newPassword) || $newPassword !== $confirmPassword) {
             return $this->errorResponse('كلمات المرور غير متطابقة');
         }
         
-        // Verify OTP first
         $verifyQuery = "SELECT * FROM password_resets 
                         WHERE user_id = ? AND otp = ? AND expires_at > NOW() 
                         LIMIT 1";
@@ -246,7 +221,6 @@ class LoginAPI {
             return $this->errorResponse('رمز التحقق غير صالح');
         }
         
-        // Update password
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
         
         $updateQuery = "UPDATE users SET password = ? WHERE id = ?";
@@ -254,7 +228,6 @@ class LoginAPI {
         $updateStmt->bind_param('si', $hashedPassword, $userId);
         
         if ($updateStmt->execute()) {
-            // Delete used OTP
             $deleteQuery = "DELETE FROM password_resets WHERE user_id = ?";
             $deleteStmt = $this->conn->prepare($deleteQuery);
             $deleteStmt->bind_param('i', $userId);
@@ -277,7 +250,6 @@ class LoginAPI {
             ]);
         }
         
-        // Check remember token
         if (isset($_COOKIE['remember_token'])) {
             $token = $_COOKIE['remember_token'];
             
@@ -293,7 +265,6 @@ class LoginAPI {
             $result = $stmt->get_result();
             
             if ($row = $result->fetch_assoc()) {
-                // Regenerate session
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $row['id'];
                 $_SESSION['user_name'] = $row['name'];
@@ -321,7 +292,6 @@ class LoginAPI {
         $stmt->bind_param('issss', $userId, $token, $expires, $token, $expires);
         $stmt->execute();
         
-        // Set cookie for 30 days
         setcookie('remember_token', $token, [
             'expires' => time() + (86400 * 30),
             'path' => '/',
@@ -332,7 +302,6 @@ class LoginAPI {
     }
     
     private function mergeSessionData($userId) {
-        // Merge cart
         if (isset($_SESSION['cart'])) {
             foreach ($_SESSION['cart'] as $productId => $quantity) {
                 $mergeQuery = "INSERT INTO user_cart (user_id, product_id, quantity) 
@@ -346,7 +315,6 @@ class LoginAPI {
             unset($_SESSION['cart']);
         }
         
-        // Merge wishlist
         if (isset($_SESSION['wishlist'])) {
             foreach ($_SESSION['wishlist'] as $productId) {
                 $wishQuery = "INSERT IGNORE INTO user_wishlist (user_id, product_id) VALUES (?, ?)";
@@ -386,7 +354,6 @@ class LoginAPI {
     }
 }
 
-// Handle the request
 try {
     $loginAPI = new LoginAPI($conn);
     $response = $loginAPI->handleRequest();
