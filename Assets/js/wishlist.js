@@ -1,4 +1,3 @@
-// wishlist.js - Wishlist Management System
 
 class WishlistSystem {
     constructor() {
@@ -113,9 +112,7 @@ class WishlistSystem {
     }
     
     updateUserInfo() {
-        // جلب بيانات المستخدم من الجلسة أو من API
         const userInfo = document.querySelector(this.selectors.userInfo);
-        // يمكنك إضافة بيانات المستخدم هنا
     }
     
     async removeItem(productId) {
@@ -142,7 +139,6 @@ class WishlistSystem {
                 this.showToast(result.msg || 'تمت إزالة المنتج من قائمة الرغبات', 'success');
                 await this.loadWishlistData();
                 
-                // تحديث العداد في الـ header إذا كان موجوداً
                 this.updateGlobalWishlistCount(result.count || 0);
             } else {
                 throw new Error(result.msg || 'فشل في إزالة المنتج');
@@ -202,7 +198,6 @@ class WishlistSystem {
             if (result.success) {
                 this.showToast('تمت إضافة المنتج إلى السلة بنجاح', 'success');
                 
-                // إزالة المنتج من قائمة الرغبات بعد إضافته للسلة
                 await this.removeItem(productId);
             } else {
                 throw new Error(result.msg || 'فشل في إضافة المنتج إلى السلة');
@@ -214,7 +209,6 @@ class WishlistSystem {
     }
     
     bindEvents() {
-        // زر مسح الكل
         document.querySelector(this.selectors.clearAllBtn).addEventListener('click', () => {
             this.clearAll();
         });
@@ -284,7 +278,6 @@ class WishlistSystem {
     }
     
     updateGlobalWishlistCount(count) {
-        // تحديث العداد في الـ header
         const headerCounter = document.getElementById('header-wishlist-count');
         if (headerCounter) {
             headerCounter.textContent = count;
@@ -296,7 +289,6 @@ class WishlistSystem {
     }
 }
 
-// Initialize wishlist system when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.WishlistSystem = new WishlistSystem();
     window.WishlistUI = {
