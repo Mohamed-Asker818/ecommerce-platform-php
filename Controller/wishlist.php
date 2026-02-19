@@ -1,33 +1,26 @@
 <?php
-// wishlist.php - المتحكم في صفحة قائمة الرغبات
 session_start();
 
-// إعداد عرض الأخطاء للتطوير (يمكن تعطيله لاحقاً)
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// تصحيح المسارات للوصول للملفات المطلوبة
-require_once __DIR__ . '/../Vendor/autoload.php'; // Assuming Smarty is loaded via Composer
-require_once __DIR__ . '/../Smarty/libs/Smarty.class.php'; // Or direct Smarty inclusion
-require_once __DIR__ . '/../Model/db.php'; // Database connection
+require_once __DIR__ . '/../Vendor/autoload.php'; 
+require_once __DIR__ . '/../Smarty/libs/Smarty.class.php'; 
+require_once __DIR__ . '/../Model/db.php'; 
 
-// إعداد Smarty
 $smarty = new Smarty();
 $smarty->setTemplateDir(__DIR__ . '/../Views/');
 $smarty->setCompileDir(__DIR__ . '/../Templates_c/');
 $smarty->setCacheDir(__DIR__ . '/../Cache/');
 
-// جلب بيانات المستخدم إذا كان مسجلاً
 $user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
 $logged_in = ($user_id > 0);
 
-// جلب عدادات السلة والمفضلة والمقارنة
 $cartCount = 0;
 $wishlistCount = 0;
 $compareCount = isset($_SESSION['compare']) ? count($_SESSION['compare']) : 0;
 
 if ($logged_in) {
-    // عداد السلة
     if ($conn) {
         $cStmt = $conn->prepare("SELECT SUM(quantity) as total FROM user_cart WHERE user_id = ?");
         if ($cStmt) {
@@ -39,7 +32,6 @@ if ($logged_in) {
         }
     }
 
-    // عداد المفضلة
     if ($conn) {
         $wStmt = $conn->prepare("SELECT COUNT(*) as total FROM user_wishlist WHERE user_id = ?");
         if ($wStmt) {
@@ -55,7 +47,6 @@ if ($logged_in) {
     $wishlistCount = isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0;
 }
 
-// تمرير البيانات للقالب
 $smarty->assign('logged_in', $logged_in);
 $smarty->assign('counts', [
     'cart' => $cartCount,
@@ -63,6 +54,5 @@ $smarty->assign('counts', [
     'compare' => $compareCount
 ]);
 
-// عرض القالب
 $smarty->display('wishlist.html');
 ?>
