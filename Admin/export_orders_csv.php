@@ -1,25 +1,21 @@
 <?php
-// admin/export_orders_csv.php
 require __DIR__ . '/admin_init.php';
 if (!is_admin()) {
     header('HTTP/1.1 403 Forbidden');
     exit;
 }
 
-// optional date range filters: start, end (YYYY-MM-DD)
 $start = isset($_GET['start']) ? $_GET['start'] : null;
 $end   = isset($_GET['end']) ? $_GET['end'] : null;
 
 header('Content-Type: text/csv; charset=UTF-8');
 $fn = 'orders_export_' . date('Ymd_His') . '.csv';
 header('Content-Disposition: attachment; filename="' . $fn . '"');
-echo "\xEF\xBB\xBF"; // UTF-8 BOM for Excel
+echo "\xEF\xBB\xBF";
 
 $out = fopen('php://output', 'w');
-// header row (Arabic)
 fputcsv($out, array('ID', 'اسم العميل', 'الهاتف', 'العنوان', 'الإجمالي', 'الحالة', 'تاريخ الطلب', 'عدد العناصر'));
 
-// build query
 $sql = "SELECT id, customer_name, phone, address, total, status, order_date FROM orders";
 $params = array();
 $types = '';
@@ -45,7 +41,6 @@ if ($stmt === false) {
     exit;
 }
 if (!empty($params)) {
-    // bind params dynamically
     $bind_names = array();
     $bind_names[] = $types;
     for ($i = 0; $i < count($params); $i++) $bind_names[] = &$params[$i];
@@ -53,11 +48,9 @@ if (!empty($params)) {
 }
 $stmt->execute();
 
-// get rows with fallback
 if (method_exists($stmt, 'get_result')) {
     $res = $stmt->get_result();
     while ($row = $res->fetch_assoc()) {
-        // count items for this order
         $rit = $conn->prepare("SELECT SUM(quantity) AS cnt FROM order_items WHERE order_id=?");
         $oid = (int)$row['id'];
         $rit->bind_param('i', $oid);
@@ -69,7 +62,6 @@ if (method_exists($stmt, 'get_result')) {
         fputcsv($out, array($row['id'], $row['customer_name'], $row['phone'], $row['address'], number_format((float)$row['total'], 2), $row['status'], $row['order_date'], $cnt));
     }
 } else {
-    // fallback without get_result
     $meta = $stmt->result_metadata();
     $fields = array();
     $row = array();
